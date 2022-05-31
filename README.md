@@ -13,7 +13,8 @@ Script options:
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -v, --variable=var1[,var2[...]]	If applicable, variables to process
   -o, --output-dir=DIR			Writes processed files to DIR
-  -s, --start-date=DATE			If applicable, start date of the forcing data; optional
+  -s, --start-date=DATE			If applicable, start date of the forcing
+  					data; optional
   -e, --end-date=DATE			If applicable, end date of the forcing data; optional
   -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
   -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional

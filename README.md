@@ -13,9 +13,10 @@ Script options:
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -v, --variable=var1[,var2[...]]	If applicable, variables to process
   -o, --output-dir=DIR			Writes processed files to DIR
-  -s, --start-date=DATE			If applicable, start date of the forcing
+  -s, --start-date=DATE			If applicable, start date of the GeoTIFF
   					data; optional
-  -e, --end-date=DATE			If applicable, end date of the forcing data; optional
+  -e, --end-date=DATE			If applicable, end date of the GeoTIFF
+  					data; optional
   -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
   -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional
   -p, --shape-file=PATH			Path to the ESRI '.shp' file; optional
@@ -28,7 +29,8 @@ Script options:
 					'stdev';'coefficient_of_variation';'frac';
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
-  -E, --email=STR			E-mail when job starts, ends, and finishes; optional
+  -E, --email=STR			E-mail when job starts, ends, and
+  					finishes; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 ```

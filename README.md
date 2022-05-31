@@ -37,18 +37,18 @@ Script options:
 |#    |Dataset                        		   |Time Scale            |DOI                    |Description          |
 |-----|--------------------------------------------|----------------------|-----------------------|---------------------|
 |1    |MODIS			     		   |2000 - 2021           | 			  |[link](modis)	|
-|> 1.1|> `landcover` (MCD12Q1 v006)    		   |> Yearly (2000 - 2021)|			  |*ditto*		|
+|  1.1|  `landcover` (MCD12Q1 v006)    		   |  Yearly (2000 - 2021)|			  |*ditto*		|
 |2    |MERIT Hydro		     		   |Not Applicable (N/A)  |10.1029/2019WR024873   |[link](merit_hydro)	|
-|> 2.1|> `dir` (Flow Direction)	     		   |> N/A		  |*ditto*		  |*ditto*		|
-|> 2.2|> `elv` (Adjusted Elevation)    		   |> N/A		  |*ditto*		  |*ditto*		|
-|> 2.3|> `upa` (Upstream Drainage Area)		   |> N/A		  |*ditto*		  |*ditto*		|
-|> 2.4|> `upg` (Number of Upstream Drainage Pixels)|> N/A		  |*ditto*		  |*ditto*		|
-|> 2.5|> `wth` (River Width)			   |> N/A		  |*ditto*		  |*ditto*		|
-|> 2.6|> `hnd` (HAND-Height Above Nearest Drainage)|> N/A		  |*ditto*		  |*ditto*		|
-|3    |Soil Grids (v1)				   |> N/A		  |*ditto*		  |[link](soil_grids_v1)|
-|> 3.1| *to be completed*		  	   |			  |			  |*ditto*		|
-|4    |Soil Grids (v2)				   |> N/A		  |*ditto*		  |[link](soil_grids_v2)|
-|> 4.1| *to be completed*			   |			  |			  |*ditto*		|
+|  2.1|  `dir` (Flow Direction)	     		   |  N/A		  |*ditto*		  |*ditto*		|
+|  2.2|  `elv` (Adjusted Elevation)    		   |  N/A		  |*ditto*		  |*ditto*		|
+|  2.3|  `upa` (Upstream Drainage Area)		   |  N/A		  |*ditto*		  |*ditto*		|
+|  2.4|  `upg` (Number of Upstream Drainage Pixels)|  N/A		  |*ditto*		  |*ditto*		|
+|  2.5|  `wth` (River Width)			   |  N/A		  |*ditto*		  |*ditto*		|
+|  2.6|  `hnd` (HAND-Height Above Nearest Drainage)|  N/A		  |*ditto*		  |*ditto*		|
+|3    |Soil Grids (v1)				   |  N/A		  |*ditto*		  |[link](soil_grids_v1)|
+|  3.1| *to be completed*		  	   |			  |			  |*ditto*		|
+|4    |Soil Grids (v2)				   |  N/A		  |*ditto*		  |[link](soil_grids_v2)|
+|  4.1| *to be completed*			   |			  |			  |*ditto*		|
 
 
 # General Example 

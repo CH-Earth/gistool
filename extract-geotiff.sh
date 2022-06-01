@@ -35,29 +35,38 @@
 # Help functions
 # ==============
 usage () {
-  echo "GeoTIFF Processing Script
+  echo "GeoTIFF Dataset Processing Script
 
 Usage:
-  $(basename $0) [options...]
+  extract-geotiff [options...]
 
 Script options:
-  -g, --geotiff				GeoTIFF dataset of interest
-                                        currently available options are:
-                                        'MERITHydro';'SoilGridsv1';'SoilGridsv2';
-					'MODIS';
-  -i, --geotiff-dir=DIR			The source path of the GeoTIFF file(s)
-  -v, --variable=var1[,var2[...]]	Variables to process
+  -d, --dataset				GeoTIFF dataset of interest, currently
+                                        available options are: 'MODIS';
+                                        'MERIT-Hydro';'SoilGridsV1';'SoilGridsV2';
+  -i, --dataset-dir=DIR			The source path of the dataset file(s)
+  -r, --crs=INT				The EPSG code of interest; optional
+  					[defaults to 4326]
+  -v, --variable=var1[,var2[...]]	If applicable, variables to process
   -o, --output-dir=DIR			Writes processed files to DIR
-  -s, --start-date=DATE			The start date of the data, if applicable
-  -e, --end-date=DATE			The end date of the data, if applicable
-  -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds
-  -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds
+  -s, --start-date=DATE			If applicable, start date of the GeoTIFF
+  					data; optional
+  -e, --end-date=DATE			If applicable, end date of the GeoTIFF
+  					data; optional
+  -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
+  -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional
+  -f, --shape-file=PATH			Path to the ESRI '.shp' file; optional
   -j, --submit-job			Submit the data extraction process as a job
 					on the SLURM system; optional
-  -k, --no-chunk			No parallelization, recommended for small domains
+  -a, --stats=stat1[,stat2[...]]	If applicable, extract the statistics of
+  					interest, currently available options are:
+					'min';'max';'mean';'majority';'minority';
+					'median';'quantiles';'variety';'variance';
+					'stdev';'coefficient_of_variation';'frac';
+  -t, --print-geotiff			Print GeoTIFF files; optional
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
-  -E, --email=user@example.com		E-mail user when job starts, ends, and finishes; optional
+  -E, --email=STR			E-mail when job starts, ends, and finishes; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 
@@ -68,7 +77,7 @@ at https://github.com/kasra-keshavarz/geotifftool/issues" >&1;
 }
 
 short_usage () {
-  echo "usage: $(basename $0) [-jh] [-i DIR] [-g DATASET] [-co DIR] [-se DATE] [-ln REAL,REAL] [-p STR]" >&1;
+  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhtE] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH} [-p STR] [-a stat1[,stat2,[...]]] " >&1;
 }
 
 version () {
@@ -91,7 +100,7 @@ shopt -s expand_aliases
 # Parsing input arguments
 # =======================
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n extract-geotiff -o jhVE:g:i:v:o:s:e:t:l:n:p:c:m:k --long submit-job,help,version,email:,geotiff:,geotiff-dir:,variable:,output-dir:,start-date:,end-date:,time-scale:,lat-lims:,lon-lims:,prefix:,cache:,ensemble:,no-chunk -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:j:a:t:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,stats:,print-geotiff,prefix:,cache:,email:,version,help -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -110,23 +119,24 @@ eval set -- "$parsedArguments"
 while :
 do
   case "$1" in
-    -h | --help)          usage                ; shift   ;; # optional
-    -V | --version)	  version	       ; shift   ;; # optional
-    -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
-    -E | --email)	  email="$2"	       ; shift 2 ;; # optional
-    -i | --geotiff-dir)   geotiffDir="$2"      ; shift 2 ;; # required
-    -g | --geotiff)       geotiff="$2"         ; shift 2 ;; # required
+    -d | --dataset)       geotiff="$2"         ; shift 2 ;; # required
+    -i | --dataset-dir)   geotiffDir="$2"      ; shift 2 ;; # required
+    -r | --crs)		  crs="$2"	       ; shift 2 ;; # optional
     -v | --variable)	  variables="$2"       ; shift 2 ;; # required
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -s | --start-date)    startDate="$2"       ; shift 2 ;; # required
-    -e | --end-date)      endDate="$2"         ; shift 2 ;; # required
-    -t | --time-scale)    timeScale="$2"       ; shift 2 ;; # required
-    -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required
-    -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required
-    -m | --ensemble)      ensemble="$2"        ; shift 2 ;; # optional
-    -k | --no-chunk)      parallel=false       ; shift   ;; # optional
+    -e | --end-date)      endDate="$2"         ; shift 2 ;; # optional
+    -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # optional
+    -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # optional
+    -f | --shape-file)	  shapefile="$2"       ; shift 2 ;; # optional
+    -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
+    -a | --stats)	  stats="$2"	       ; shift 2 ;; # optional
+    -t | --print-geotiff) printGeotiff=true    ; shift   ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
+    -E | --email)	  email="$2"	       ; shift 2 ;; # optional
+    -V | --version)	  version	       ; shift   ;; # optional 
+    -h | --help)          usage                ; shift   ;; # optional
 
     # -- means the end of the arguments; drop this, and break out of the while loop
     --) shift; break ;;
@@ -143,8 +153,6 @@ if [[ -z "${geotiffDir}" ]] || \
    [[ -z "${geotiff}"    ]] || \
    [[ -z "${variables}"  ]] || \
    [[ -z "${outputDir}"  ]] || \
-   [[ -z "${latLims}"    ]] || \
-   [[ -z "${lonLims}"    ]] || \
    [[ -z "${prefixStr}"  ]]; then
 
    echo "$(basename $0): mandatory option(s) missing.";
@@ -152,9 +160,9 @@ if [[ -z "${geotiffDir}" ]] || \
    exit 1;
 fi
 
-# default value for timeScale if not provided as an argument
-if [[ -z $timeScale ]]; then
-  timeScale="M"
+# if printGeotiff is not triggered
+if [[ -z $printGeotiff ]]; then
+  printGeotiff=false
 fi
 
 # default value for cache path if not provided as an argument
@@ -164,84 +172,45 @@ elif [[ -z $cache ]]; then
   cache="$HOME/scratch/.temp_data_$(date +"%N")"
 fi
 
-# default value for parallelization
-if [[ -z $parallel ]]; then
-  parallel=true
-fi
-
 # email withought job submission not allowed
 if [[ -n $email ]] && [[ -z $jobSubmission ]]; then
   echo "$(basename $0): Email is not supported wihtout job submission;"
   echo "$(basename $0): Continuing without email notification..."
 fi
 
+# either shapefile or spatial extents arguments are allowed
+if [[ -n $shapefile ]] && [[ -n $latLims ]]; then
+  echo "$(basename $0): ERROR! Either shapefile or spatial extents should be entered"
+  exit 1;
+elif [[ -n $shapefile ]] && [[ -n $lonLims ]]; then
+  echo "$(basename $0): ERROR! Either shapefile or spatial extents should be entered"
+  exit 1;
+fi
 
-# ===========================
-# Quasi-parallel requirements
-# ===========================
-# necessary arrays
-startDateArr=() # start dates array
-endDateArr=()   # end dates array
-
-# necessary one-liner functions
-unix_epoch () { date --date="$@" +"%s"; } # unix EPOCH command
-format_date () { date --date="$1" +"$2"; } # format date
-
-# default date format
-dateFormat="%Y-%m-%d %H:%M:%S"
-
-chunk_dates () {
-  # local variables
-  local toDate="$startDate"
-  local tStep="$1"
-  local midDate
-  local toDateEnd
-
-  # if no chunking
-  if [[ "$parallel" == "false" ]]; then
-    startDateArr+=("$(format_date "$startDate" "$dateFormat")")
-    endDateArr+=("$(format_date "$endDate" "$dateFormat")")
-    return # exit the function
-
-  # if chunking
-  elif [[ "$parallel" == "true" ]]; then
-
-    while [[ "$(unix_epoch "$toDate")" -le "$(unix_epoch "$endDate")" ]]; do
-      midDate="$(format_date "$toDate" "%Y-%m-01")"
-      toDateEnd="$(format_date "$midDate $tStep -1hour" "$dateFormat")"
-
-      # considering last month if not fully being a $tStep
-      if [[ "$(unix_epoch "$toDateEnd")" -ge "$(unix_epoch "$endDate")" ]]; then
-        startDateArr+=("$(format_date "$toDate" "$dateFormat")")
-        endDateArr+=("$(format_date "$endDate" "$dateFormat")")
-        break # break the while loop
-      fi
-
-      startDateArr+=("$(format_date "$toDate" "$dateFormat")")
-      endDateArr+=("$(format_date "$toDateEnd" "$dateFormat")")
-
-      toDate=$(date --date="$midDate $tStep")
-    done
-  fi
-}
+# if no crs is entered, assign the default value of EPSG 4326
+if [[ -z $crs ]]; then
+  crs=4326
+fi
 
 
 # ======================
 # Necessary preparations
 # ======================
 # put necessary arguments in an array - just for legibility
-declare -A funcArgs=([jobSubmission]="$jobSubmission" \
-		     [geotiffDir]="$geotiffDir" \
+declare -A funcArgs=([geotiffDir]="$geotiffDir" \
+		     [crs]="$crs" \
 		     [variables]="$variables" \
 		     [outputDir]="$outputDir" \
-		     [timeScale]="$timeScale" \
 		     [startDate]="$startDate" \
 		     [endDate]="$endDate" \
 		     [latLims]="$latLims" \
 		     [lonLims]="$lonLims" \
+		     [shapefile]="$shapefile" \
+		     [jobSubmission]="$jobSubmission" \
+		     [stats]="$stats" \
+		     [printGeotiff]="$printGeotiff" \
 		     [prefixStr]="$prefixStr" \
 		     [cache]="$cache" \
-		     [ensemble]="$ensemble" \
 		    );
 
 
@@ -259,7 +228,7 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --geotiff-dir="${funcArgs[geotiffDir]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --time-scale="${funcArgs[timeScale]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}" --ensemble="${funcArgs[ensemble]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shapefile="${funcArgs[shapefile]}" --stats="${funcArgs[stats]}" --print-geotiff="${funcArgs[printGeotiff]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
 	EOF
 
   # evaluate the script file using the arguments provided

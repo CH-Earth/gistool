@@ -1,15 +1,14 @@
 # Description
-This repository contains scripts to process necessary GeoTIFF datasets. The general usage of the script (i.e., `./extract-geotiff.sh`) is as follows:
+This repository contains scripts to process necessary GeoTIFF datasets and implement efficient zonal statistics upon request. The general usage of the script (i.e., `./extract-geotiff.sh`) is as follows:
 
 ```console
 Usage:
   extract-geotiff [options...]
 
 Script options:
-  -d, --dataset				GeoTIFF dataset of interest,
-                                        currently available options are:
-                                        'MODIS';'MERIT-Hydro';'SoilGridsV1';
-					'SoilGridsV2';
+  -d, --dataset				GeoTIFF dataset of interest, currently
+                                        available options are: 'MODIS';
+                                        'MERIT-Hydro';'SoilGridsV1';
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -v, --variable=var1[,var2[...]]	If applicable, variables to process
   -o, --output-dir=DIR			Writes processed files to DIR
@@ -29,20 +28,19 @@ Script options:
 					'stdev';'coefficient_of_variation';'frac';
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
-  -E, --email=STR			E-mail when job starts, ends, and
-  					finishes; optional
+  -E, --email=STR			E-mail when job starts, ends, and finishes; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 ```
 
 
 # Available Datasets
-|**#**|Dataset                        		   |Time Scale            |DOI                    |Description          |
-|-----|--------------------------------------------|----------------------|-----------------------|---------------------|
-|**1**|MODIS			     		   |2000 - 2021           | 			  |[link](modis)	|
-|**2**|MERIT Hydro		     		   |Not Applicable (N/A)  |10.1029/2019WR024873   |[link](merit_hydro)	|
-|**3**|Soil Grids (v1)				   |  N/A		  |*ditto*		  |[link](soil_grids_v1)|
-|**4** |Soil Grids (v2)				   |  N/A		  |*ditto*		  |[link](soil_grids_v2)|
+|**#**|Dataset                        		   |Time Scale            |CRS  |DOI                    |Description          |
+|-----|--------------------------------------------|----------------------|-----|-----------------------|---------------------|
+|**1**|MODIS			     		   |2000 - 2021           |	| 			|[link](modis)	      |
+|**2**|MERIT Hydro		     		   |Not Applicable (N/A)  |4326	|10.1029/2019WR024873   |[link](merit_hydro)  |
+|**3**|Soil Grids (v1)				   | N/A		  |	|			|[link](soil_grids_v1)|
+|**4**|Soil Grids (v2)				   | N/A		  |	|			|[link](soil_grids_v2)|
 
 
 # General Example 
@@ -57,7 +55,7 @@ foo@bar:~$ ./extract-geotiff.sh  --geotiff="MERIT-Hydro" \
                                  --output-dir="$HOME/scratch/conus_i_output/" \
                                  --start-date="2001-01-01 00:00:00" \
                                  --end-date="2001-12-31 23:00:00" \
-                                 --lat-lims=49,51  \
+                                 --lat-lims=49,51 \
                                  --lon-lims=-117,-115 \
                                  --variable=T2,PREC_ACC_NC,Q2,ACSWDNB,ACLWDNB,U10,V10,PSFC \
                                  --prefix="conus_i";

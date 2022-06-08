@@ -58,12 +58,11 @@ Script options:
   -f, --shape-file=PATH			Path to the ESRI '.shp' file; optional
   -j, --submit-job			Submit the data extraction process as a job
 					on the SLURM system; optional
-  -a, --stats=stat1[,stat2[...]]	If applicable, extract the statistics of
+  -a, --stat=stat1[,stat2[...]]	If applicable, extract the statistics of
   					interest, currently available options are:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantiles';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-  -t, --print-geotiff			Print GeoTIFF files; optional
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and finishes; optional
@@ -100,7 +99,7 @@ shopt -s expand_aliases
 # Parsing input arguments
 # =======================
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:j:a:t:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,stats:,print-geotiff,prefix:,cache:,email:,version,help -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:j:a:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,stat:,prefix:,cache:,email:,version,help -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -130,8 +129,7 @@ do
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # optional
     -f | --shape-file)	  shapefile="$2"       ; shift 2 ;; # optional
     -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
-    -a | --stats)	  stats="$2"	       ; shift 2 ;; # optional
-    -t | --print-geotiff) printGeotiff=true    ; shift   ;; # optional
+    -a | --stat)	  stat="$2"	       ; shift 2 ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
     -E | --email)	  email="$2"	       ; shift 2 ;; # optional
@@ -208,7 +206,6 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 		     [shapefile]="$shapefile" \
 		     [jobSubmission]="$jobSubmission" \
 		     [stats]="$stats" \
-		     [printGeotiff]="$printGeotiff" \
 		     [prefixStr]="$prefixStr" \
 		     [cache]="$cache" \
 		    );
@@ -228,7 +225,7 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shapefile="${funcArgs[shapefile]}" --stats="${funcArgs[stats]}" --print-geotiff="${funcArgs[printGeotiff]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --stat="${funcArgs[stats]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
 	EOF
 
   # evaluate the script file using the arguments provided
@@ -277,7 +274,7 @@ call_processing_func () {
 # Checking Input GeoTIFF 
 # ======================
 
-case "${dataset,,}" in
+case "${geotiff,,}" in
   # MERIT Hydro
   "merithydro" | "merit hydro" | "merit-hydro" | "merit_hydro")
     call_processing_func "$(dirname $0)/merit_hydro/merit_hydro.sh"

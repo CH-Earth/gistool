@@ -42,12 +42,12 @@
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-t CHAR] [-ln REAL,REAL] [-f PATH] [-a stat1[,stat2,[...]]] [-t] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-a stat1[,stat2,[...]]] [-t] [-p STR] "
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:a:tp:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lan-lims:,lon-lims:,shape-file:,stat:,print-geotiff,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:a:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,stat:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -75,7 +75,6 @@ do
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # required - could be redundant
-    -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required - could be redundant
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required
 
@@ -129,24 +128,20 @@ load_core_modules () {
 load_core_modules
 
 
-#######################################
-# useful one-liners
-#######################################
+# =================
+# Useful One-liners
+# =================
 # MERIT-Hydro specific latitude limits
-lat_extent () { echo "define merit_extent_lat (x) \
+merit_extent () { echo "define merit_extent_lat (x) \
                       {if (x<0) { if (x%30 == 0) {return ((x/30)*30)} \
                       else {return (((x/30)-1)*30) }} \
-                      else {return ((x/30)*30) } }; merit_extent_lat($1)" | bc; }
-
-# MERIT-Hydro specific longitude limits
-lon_extent () { echo "define merit_extent_lon (x) \
-                      {return ((x/30)*30) }; \
-                      merit_extent_lon($1)" | bc; }
+                      else {return ((x/30)*30) } }; \
+		      merit_extent_lat($1)" | bc; }
 
 # sorting a comma-delimited string of real numbers
 sort_comma_delimited () { IFS=',' read -ra arr <<< "$*"; echo ${arr[*]} | tr " " "\n" | sort -n | tr "\n" " "; }
 
-# MERIT-Hydro coordinate signs
+# MERIT-Hydro coordinate signs and digit style
 lat_sign () { if (( $* < 0 )); then printf "s%02g\n" $(echo "$*" | tr -d '-'); else printf "n%02g\n" "$*"; fi; }
 lon_sign () { if (( $* < 0 )); then printf "w%03g\n" $(echo "$*" | tr -d '-'); else printf "e%03g\n" "$*"; fi; }
 
@@ -155,42 +150,121 @@ lon_sign () { if (( $* < 0 )); then printf "w%03g\n" $(echo "$*" | tr -d '-'); e
 # Parse latitute/longitude limits
 #
 # Globals:
-#   sortedArr: sorted ascendingly of
-#	       the input numbers
+#   sortedArr: sorted ascendingly array 
+#	       of the input numbers
 #
 # Arguments:
 #   coordLims: comma-delimited string
 #	       of real numbers
-#   coordType: either `lat` or `lon`
-#	       important for MERITHydro
 #
 # Outputs:
-#   sequence of numbers echoed from an
+#   sequence of integers echoed from an
 #   array.
 #######################################
 parse_coord_lims () {
   # local variables
-  local coordType="$1"
-  shift # skipping the first argument
   local coordLims="$@"
   local limsSeq
+  local limSorted
 
   # parsing the input string
   IFS=' ' read -ra limsSorted <<< $(sort_comma_delimited "$coordLims")
   # creating sequence of numbers
-  if [[ "$coordType" == "lat" ]]; then
-    limSeq=($(seq $(lat_extent "${limsSorted[0]}") \
-                  30 \
-                  $(lat_extent "${limsSorted[1]}")) \
+  limSeq=($(seq $(merit_extent "${limsSorted[0]}") \
+                30 \
+                $(merit_extent "${limsSorted[1]}")) \
         )
-  elif [[ "$coordType" == "lon" ]]; then
-    limSeq=($(seq $(lon_extent "${limsSorted[0]}") \
-                  30 \
-                  $(lon_extent "${limsSorted[1]}")) \
-        )
-  fi
   # echoing the `limSeq`
   echo "${limSeq[@]}"
+}
+
+
+#######################################
+# extract original MERIT-Hydro `tar`s
+# for the latitude and longitude exten-
+# ts of interest.
+#
+# Globals:
+#   None
+#
+# Arguments:
+#   sourceDir: the path to the
+#	       sourceDir
+#   destDir: the path to the destinati-
+#	     on
+#   var: the name of the MERIT-Hydro
+#        dataset variable; MUST be one
+#        of the following: elv;dir;hnd
+#	 upa;upg;wth
+#
+# Outputs:
+#   untarred files produced under
+#   `$destDir`
+#######################################
+extract_merit_tar () {
+  # local variables
+  local sourceDir="$1" # source path
+  local destDir="$2" # destination path
+  local var="$3" # MERIT-Hydro variable
+  local lat # counter variable
+  local lon # counter variable
+
+  # create sequence of latitude and longitude values
+  local latSeq=($(parse_coord_lims "$latLims"))
+  local lonSeq=($(parse_coord_lims "$lonLims"))
+
+  # if rectangular subset is requested
+  for lat in "${latSeq[@]}"; do
+    for lon in "${lonSeq[@]}"; do
+      # strip-components to evade making 
+      # folder separately for each tar file
+      tar --strip-components=1 -xf "${sourceDir}/${var}/${var}_$(lat_sign ${lat})$(lon_sign ${lon}).tar" -C "${destDir}"
+    done
+  done
+}
+
+#######################################
+# subset GeoTIFFs
+#
+# Globals:
+#   latLims: comma-delimited latitude
+#            limits
+#   lonLims: comma-delimited longitude
+#            limits
+#
+# Arguments:
+#   sourceVrt: source vrt file
+#   destPath: destionation path (inclu-
+#	      ding file name)
+#
+# Outputs:
+#   one mosaiced (merged) GeoTIFF under
+#   the $destDir
+#######################################
+subset_geotiff () {
+  # local variables
+  local latMin
+  local latMax
+  local lonMin
+  local lonMax
+  local sortedLats
+  local sortedLons
+  # reading arguments
+  local sourceVrt="$1"
+  local destPath="$2"
+
+  # extracting minimum and maximum of latitude and longitude respectively
+  ## latitude
+  sortedLats=($(sort_comma_delimited "$latLims"))
+  latMin="${sortedLats[0]}"
+  latMax="${sortedLats[1]}"
+  ## longitude
+  sortedLons=($(sort_comma_delimited "$lonLims"))
+  lonMin="${sortedLons[0]}"
+  lonMax="${sortedLons[1]}"
+
+  # subset based on lat/lon
+  gdal_translate -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" > /dev/null
 }
 
 
@@ -208,5 +282,39 @@ mkdir -p "$cache"
 echo "$(basename $0): creating output directory under $outputDir"
 mkdir -p "$outputDir" # making the output directory
 
+# extract shapefile extents if provided
+if [[ -n $shapefile ]]; then
+  IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefile" | sed 's/[),(]//g' | grep Extent)"
+  # define $latLims and $lonLims from $shapefileExtents
+  latLims="${shapefileExtents[2]},${shapefileExtents[5]}"
+  lonLims="${shapefileExtents[1]},${shapefileExtents[4]}"
+fi
+
+# untar MERIT-Hydro files and build .vrt file out of them
+# for each variable
+echo "$(basename $0): untarring MERIT-Hydro variables under $cache"
+for var in "${variables[@]}"; do
+  # create temporary directories for each variable
+  mkdir -p "$cache/$var"
+  # extract the `tar`s
+  extract_merit_tar "$geotiffDir" "${cache}/${var}" "$var"
+  # make .vrt out of each variable's GeoTIFFs
+  # ATTENTION: the second argument is not contained with quotation marks
+  gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
+done
+
+# subset and produce stats if needed
+echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
+for var in "${variables[@]}"; do
+  # subset based on lat and lon values
+  subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${var}.tif"
+done
+
+# produce stats if required
+mkdir "$HOME/empty_dir"
+echo "$(basename $0): deleting temporary files from $cache"
+rsync -aP --delete "$HOME/empty_dir/" "$cache"
+rm -r "$cache"
+echo "$(basename $0): temporary files from $cache are removed"
 echo "$(basename $0): results are produced under $outputDir."
 

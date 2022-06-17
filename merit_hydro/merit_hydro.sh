@@ -1,9 +1,9 @@
 #!/bin/bash
-# GeoTIFF Data Processing Workflow
+# GIS Data Processing Workflow
 # Copyright (C) 2022, University of Saskatchewan
 # Copyright (C) 2021, Wouter Knoben
 #
-# This file is part of GeoTIFF Data Processing Workflow
+# This file is part of GIS Data Processing Workflow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,12 +42,12 @@
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-a stat1[,stat2,[...]]] [-t] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]]] [-p STR] "
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:a:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,stat:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -74,6 +74,7 @@ do
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
+    -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # required - could be redundant
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required
@@ -99,6 +100,9 @@ if [[ -z $prefix ]]; then
   prefix="merit_hydro"
 fi
 
+# parse comma-delimited variables
+IFS=',' read -ra variables <<< "${variables}"
+
 
 # =====================
 # Necessary Assumptions
@@ -107,6 +111,10 @@ fi
 alias date='TZ=UTC date'
 # expand aliases for the one stated above
 shopt -s expand_aliases
+# hard-coded paths
+renvCache="/project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/" # general renv cache path
+exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
+renvPackagePath="${renvCache}/renv_0.15.5.tar.gz" # renv_0.15.5 source path
 
 
 # ==========================
@@ -122,8 +130,8 @@ shopt -s expand_aliases
 load_core_modules () {
     module purge
     module -q load gcc/9.3.0
-    module -q load r
-    module -q load gdal 
+    module -q load r/4.1.2
+    module -q load gdal/3.4.1
 }
 load_core_modules
 
@@ -131,7 +139,7 @@ load_core_modules
 # =================
 # Useful One-liners
 # =================
-# MERIT-Hydro specific latitude limits
+# MERIT-Hydro specific latitude and longitude limits
 merit_extent () { echo "define merit_extent_lat (x) \
                       {if (x<0) { if (x%30 == 0) {return ((x/30)*30)} \
                       else {return (((x/30)-1)*30) }} \
@@ -223,6 +231,7 @@ extract_merit_tar () {
   done
 }
 
+
 #######################################
 # subset GeoTIFFs
 #
@@ -304,11 +313,59 @@ for var in "${variables[@]}"; do
 done
 
 # subset and produce stats if needed
-echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
-for var in "${variables[@]}"; do
-  # subset based on lat and lon values
-  subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${var}.tif"
-done
+if [[ "$printGeotiff" == "true" ]]; then
+  echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
+  for var in "${variables[@]}"; do
+    # subset based on lat and lon values
+    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${var}.tif"
+  done
+fi
+
+# produce given $stats
+## make R renv project directory
+if [[ -z "$shapefile" ]] && [[ -z $stats ]]; then
+  mkdir -p "$cache/r-virtual-env/"
+  ## make R renv in $cache
+  virtualEnvPath="$cache/r-virtual-env"
+  cp "$(dirname $0)/assets/renv.lock" "$virtualEnvPath"
+  ## load necessary modules - excessive, mainly for clarification
+  load_core_modules
+  ## build renv and create stats
+  R -q -e 'args <- commandArgs(); 
+	   
+	   exactextractr_cache_path <- args[6]; 
+	   renv_source_package <- args[7]; 
+	   virtual_env_path <- args[8];
+	   working_dir_path <- args[9];
+	   lockfile_path <- args[10];
+	   vrt_path <- args[11];
+	   shapefile_path <- args[12];
+	   stats <- args[13];
+	   output_path <- args[14];
+
+	   setwd(working_dir_path)
+
+	   Sys.setenv("RENV_PATHS_CACHE"=exactextractr_cache_path);
+	   install.packages(renv_source_package, repos=NULL, type="source", quiet=TRUE);
+	   renv::activate(virtual_env_path);
+	   renv::restore(lockfile=lockfile_path, prompt=FALSE);
+
+	   r <- raster::raster(vrt_path);
+	   p <- sf::st_read(shapefile_path);
+	   qs <- seq(0.1, 1, by=0.1);
+	   df <- cbind(p$COMID, exactextractr::exact_extract(r, p, c(stats), quantiles=qs));
+	   write.csv(df, output_path, row.names=FALSE, quote=FALSE)' \
+    "$exactextractrCache" \
+    "$renvPackagePath" \
+    "$virtualEnvPath" \
+    "$virtualEnvPath" \
+    "${virtualEnvPath}/renv.lock" \
+    "${cache}/${var}.vrt" \
+    "$shapefile" \
+    "$stats" \
+    "$outputDir" ;
+
+fi
 
 # produce stats if required
 mkdir "$HOME/empty_dir"

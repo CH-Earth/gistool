@@ -133,6 +133,9 @@ load_core_modules () {
     module -q load gcc/9.3.0
     module -q load r/4.1.2
     module -q load gdal/3.4.1
+    module -q load udunits/2.2.28
+    module -q load geos/3.10.2
+    module -q load proj/9.0.0
 }
 load_core_modules
 
@@ -273,7 +276,7 @@ subset_geotiff () {
   lonMin="${sortedLons[0]}"
   lonMax="${sortedLons[1]}"
 
-  # subset based on lat/lon
+  # subset based on lat/lon - flush to disk at 500MB
   GDAL_CACHEMAX=500
   gdal_translate --config GDAL_CACHEMAX 500 \
   		 -co COMPRESS="DEFLATE" \
@@ -318,7 +321,6 @@ for var in "${variables[@]}"; do
   gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
 done
 
-echo $printGeotiff
 # subset and produce stats if needed
 if [[ "$printGeotiff" == "true" ]]; then
   echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
@@ -328,49 +330,26 @@ if [[ "$printGeotiff" == "true" ]]; then
   done
 fi
 
-# produce given $stats
 ## make R renv project directory
-if [[ -z "$shapefile" ]] && [[ -z $stats ]]; then
+if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   mkdir -p "$cache/r-virtual-env/"
   ## make R renv in $cache
-  virtualEnvPath="$cache/r-virtual-env"
-  cp "$(dirname $0)/assets/renv.lock" "$virtualEnvPath"
+  virtualEnvPath="$cache/r-virtual-env/"
+  cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
   ## load necessary modules - excessive, mainly for clarification
   load_core_modules
   ## build renv and create stats
-  R -q -e 'args <- commandArgs(); 
-	   
-	   exactextractr_cache_path <- args[6]; 
-	   renv_source_package <- args[7]; 
-	   virtual_env_path <- args[8];
-	   working_dir_path <- args[9];
-	   lockfile_path <- args[10];
-	   vrt_path <- args[11];
-	   shapefile_path <- args[12];
-	   stats <- args[13];
-	   output_path <- args[14];
-
-	   setwd(working_dir_path)
-
-	   Sys.setenv("RENV_PATHS_CACHE"=exactextractr_cache_path);
-	   install.packages(renv_source_package, repos=NULL, type="source", quiet=TRUE);
-	   renv::activate(virtual_env_path);
-	   renv::restore(lockfile=lockfile_path, prompt=FALSE);
-
-	   r <- raster::raster(vrt_path);
-	   p <- sf::st_read(shapefile_path);
-	   qs <- seq(0.1, 1, by=0.1);
-	   df <- cbind(p$COMID, exactextractr::exact_extract(r, p, c(stats), quantiles=qs));
-	   write.csv(df, output_path, row.names=FALSE, quote=FALSE)' \
-    "$exactextractrCache" \
-    "$renvPackagePath" \
-    "$virtualEnvPath" \
-    "$virtualEnvPath" \
-    "${virtualEnvPath}/renv.lock" \
-    "${cache}/${var}.vrt" \
-    "$shapefile" \
-    "$stats" \
-    "$outputDir" ;
+  Rscript "$(dirname $0)/../assets/stats.R" \
+  	  "$exactextractrCache" \
+  	  "$renvPackagePath" \
+	  "$virtualEnvPath" \
+	  "$virtualEnvPath" \
+	  "${virtualEnvPath}/renv.lock" \
+	  "${cache}/${var}.vrt" \
+	  "$shapefile" \
+	  "$outputDir/stats.csv" \
+	  "$stats" \
+	  "$quantiles";
 
 fi
 
@@ -379,6 +358,6 @@ mkdir "$HOME/empty_dir"
 echo "$(basename $0): deleting temporary files from $cache"
 #rsync -aP --delete "$HOME/empty_dir/" "$cache"
 #rm -r "$cache"
-#echo "$(basename $0): temporary files from $cache are removed"
-#echo "$(basename $0): results are produced under $outputDir."
+echo "$(basename $0): temporary files from $cache are removed"
+echo "$(basename $0): results are produced under $outputDir."
 

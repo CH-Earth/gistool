@@ -129,7 +129,7 @@ renvPackagePath="${renvCache}/renv_0.15.5.tar.gz" # renv_0.15.5 source path
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-    module purge
+    module -q purge
     module -q load gcc/9.3.0
     module -q load r/4.1.2
     module -q load gdal/3.4.1
@@ -326,7 +326,7 @@ if [[ "$printGeotiff" == "true" ]]; then
   echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
   for var in "${variables[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${var}.tif"
+    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${prefix}${var}.tif"
   done
 fi
 
@@ -338,26 +338,29 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
   ## load necessary modules - excessive, mainly for clarification
   load_core_modules
-  ## build renv and create stats
-  Rscript "$(dirname $0)/../assets/stats.R" \
-  	  "$exactextractrCache" \
-  	  "$renvPackagePath" \
-	  "$virtualEnvPath" \
-	  "$virtualEnvPath" \
-	  "${virtualEnvPath}/renv.lock" \
-	  "${cache}/${var}.vrt" \
-	  "$shapefile" \
-	  "$outputDir/stats.csv" \
-	  "$stats" \
-	  "$quantiles";
-
+  
+  # extract given stats for each variable
+  for var in "${variables[@]}"; do
+    ## build renv and create stats
+    Rscript "$(dirname $0)/../assets/stats.R" \
+  	    "$exactextractrCache" \
+  	    "$renvPackagePath" \
+	    "$virtualEnvPath" \
+	    "$virtualEnvPath" \
+	    "${virtualEnvPath}/renv.lock" \
+	    "${cache}/${var}.vrt" \
+	    "$shapefile" \
+	    "$outputDir/${prefix}stats_${var}.csv" \
+	    "$stats" \
+	    "$quantiles";
+  done
 fi
 
 # produce stats if required
 mkdir "$HOME/empty_dir"
 echo "$(basename $0): deleting temporary files from $cache"
-#rsync -aP --delete "$HOME/empty_dir/" "$cache"
-#rm -r "$cache"
+rsync --quiet -aP --delete "$HOME/empty_dir/" "$cache"
+rm -r "$cache"
 echo "$(basename $0): temporary files from $cache are removed"
 echo "$(basename $0): results are produced under $outputDir."
 

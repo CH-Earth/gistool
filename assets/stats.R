@@ -27,5 +27,5 @@ r <- raster::raster(vrt_path);
 p <- sf::st_read(shapefile_path, quiet=TRUE);
 q <- as.double(unlist(strsplit(quantiles, ",")));
 s <- unlist(strsplit(stats, ","));
-df <- cbind(p$COMID, exactextractr::exact_extract(r, p, s, quantiles=q));
+df <- cbind(p[[1]], exactextractr::exact_extract(r, p, s, quantiles=q)); # assuming first column indicates ID
 write.csv(df, output_path, row.names=FALSE, quote=FALSE)

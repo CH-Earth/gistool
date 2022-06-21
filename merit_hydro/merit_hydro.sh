@@ -42,12 +42,12 @@
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]]] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] [-p STR] "
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -75,7 +75,8 @@ do
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
-    -a | --stat)	  stats="$2"	       ; shift 2 ;; # required - could be redundant
+    -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required
 
@@ -273,7 +274,12 @@ subset_geotiff () {
   lonMax="${sortedLons[1]}"
 
   # subset based on lat/lon
-  gdal_translate -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" > /dev/null
+  GDAL_CACHEMAX=500
+  gdal_translate --config GDAL_CACHEMAX 500 \
+  		 -co COMPRESS="DEFLATE" \
+  		 -co BIGTIFF="YES" \
+		 -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
+		 > /dev/null;
 }
 
 
@@ -312,6 +318,7 @@ for var in "${variables[@]}"; do
   gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
 done
 
+echo $printGeotiff
 # subset and produce stats if needed
 if [[ "$printGeotiff" == "true" ]]; then
   echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
@@ -370,8 +377,8 @@ fi
 # produce stats if required
 mkdir "$HOME/empty_dir"
 echo "$(basename $0): deleting temporary files from $cache"
-rsync -aP --delete "$HOME/empty_dir/" "$cache"
-rm -r "$cache"
-echo "$(basename $0): temporary files from $cache are removed"
-echo "$(basename $0): results are produced under $outputDir."
+#rsync -aP --delete "$HOME/empty_dir/" "$cache"
+#rm -r "$cache"
+#echo "$(basename $0): temporary files from $cache are removed"
+#echo "$(basename $0): results are produced under $outputDir."
 

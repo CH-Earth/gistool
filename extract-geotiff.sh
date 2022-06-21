@@ -35,7 +35,7 @@
 # Help functions
 # ==============
 usage () {
-  echo "GeoTIFF Dataset Processing Script
+  echo "Geo-spatial Dataset Processing Script
 
 Usage:
   extract-geotiff [options...]
@@ -43,7 +43,7 @@ Usage:
 Script options:
   -d, --dataset				GeoTIFF dataset of interest, currently
                                         available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1';'SoilGridsV2';
+                                        'MERIT-Hydro';'SoilGridsV1'
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -59,15 +59,21 @@ Script options:
   -j, --submit-job			Submit the data extraction process as a job
 					on the SLURM system; optional
   -t, --print-geotiff=BOOL		Extract the subsetted GeoTIFF file; optional
-  					[defaults to true]
+  					[defaults to 'true']
   -a, --stat=stat1[,stat2[...]]		If applicable, extract the statistics of
   					interest, currently available options are:
 					'min';'max';'mean';'majority';'minority';
-					'median';'quantiles';'variety';'variance';
+					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
+					optional
+  -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
+  					is included in the '--stat' argument. The values
+					must be comma delimited float numbers between
+					0 and 1; optional [defaults to every 5th quantile]
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
-  -E, --email=STR			E-mail when job starts, ends, and finishes; optional
+  -E, --email=STR			E-mail when job starts, ends, and 
+  					finishes; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 
@@ -78,7 +84,7 @@ at https://github.com/kasra-keshavarz/geotifftool/issues" >&1;
 }
 
 short_usage () {
-  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhE] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH} [-p STR] [-a stat1[,stat2,[...]]] " >&1;
+  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhE] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH} [-p STR] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] " >&1;
 }
 
 version () {
@@ -101,7 +107,7 @@ shopt -s expand_aliases
 # Parsing input arguments
 # =======================
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,prefix:,cache:,email:,version,help -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:q:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,quantile:,prefix:,cache:,email:,version,help -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -132,7 +138,8 @@ do
     -f | --shape-file)	  shapefile="$2"       ; shift 2 ;; # optional
     -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # optional
-    -a | --stat)	  stat="$2"	       ; shift 2 ;; # optional
+    -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -q | --qauntile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
     -E | --email)	  email="$2"	       ; shift 2 ;; # optional
@@ -171,10 +178,15 @@ if [[ -n $printGeotiff ]]; then
   case "${printGeotiff,,}" in
     "true" | "1" )
       printGeotiff="true"
+      ;;
+
     "false" | "0" )
       printGeotiff="false"
+      ;;
+
     *)
       echo "$(basename $0): invalid value for --print-geotiff, continuing with default value of true"
+      ;;
   esac
 fi
 
@@ -205,9 +217,9 @@ if [[ -z $crs ]]; then
   crs=4326
 fi
 
-# at least $printGeotiff=true or $stats=stat1[,stat2[...]]
-if [[ -z $printGeotiff ]] || [[ -z $stats ]]; then
-  echo "$(basename $0): ERROR! Either of --print-geotiff or --stats must be provided."
+# at least $printGeotiff=true or $stats=stat1[,stat2[...]] must be provided
+if [[ "${printGeotiff,,}" == "false" ]] && [[ -z $stats ]]; then
+  echo "$(basename $0): ERROR! At minimum, either of --print-geotiff or --stats must be provided."
   exit 1;
 fi
 
@@ -228,12 +240,10 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 		     [jobSubmission]="$jobSubmission" \
 		     [printGeotiff]="$printGeotiff" \
 		     [stats]="$stats" \
+		     [quantiles]="$quantiles" \
 		     [prefixStr]="$prefixStr" \
 		     [cache]="$cache" \
 		    );
-
-# setup R environment for zonal statistics calculations
-
 
 
 # =================================
@@ -250,7 +260,7 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]} "--stat="${funcArgs[stats]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
 	EOF
 
   # evaluate the script file using the arguments provided
@@ -310,11 +320,6 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/soil_grids/soil_grids_v1.sh"
     ;;
 
-  # Soil Grids v2
-  "soil-grids-v2" | "soilgridsv2" | "soil_grids_v2" | "soil grids v2")
-    call_processing_func "$(dirname $0)/soil_grids/soil_grids_v2.sh"
-    ;;
-  
   # MODIS
   "modis")
     call_processing_func "$(dirname $0)/modis/modis.sh"

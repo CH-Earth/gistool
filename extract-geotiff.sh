@@ -185,7 +185,7 @@ if [[ -n $printGeotiff ]]; then
       ;;
 
     *)
-      echo "$(basename $0): invalid value for --print-geotiff, continuing with default value of true"
+      echo "$(basename $0): invalid value for '--print-geotiff', continuing with default value of 'true'"
       ;;
   esac
 fi
@@ -219,8 +219,21 @@ fi
 
 # at least $printGeotiff=true or $stats=stat1[,stat2[...]] must be provided
 if [[ "${printGeotiff,,}" == "false" ]] && [[ -z $stats ]]; then
-  echo "$(basename $0): ERROR! At minimum, either of --print-geotiff or --stats must be provided."
+  echo "$(basename $0): ERROR! At minimum, either of '--print-geotiff' or '--stats' must be provided"
   exit 1;
+fi
+
+# if quantile is not given in '--stat' but '--quantile' is provided
+if [[ "$stats" != *"quantile"* ]] && [[ -n $quantiles ]]; then
+  echo "$(basename $0): ERROR! 'quantile' stat is not provided in '--stat' while '--quantile' argument is filled"
+  exit 1;
+fi
+
+# if quantile is given in '--stat' but '--quantile' is not provided
+if [[ "$stats" == *"quantile"* ]] && [[ -z $quantiles ]]; then
+  echo "$(basename $0): Warning! 'quantile' stat is provided in '--stat' while '--quantile' is not filled;"
+  echo "$(basename $0): Continuing with default values of 25th, 50th, and 75th quantiles"
+  quantiles="0.25,0.50,0.75"
 fi
 
 

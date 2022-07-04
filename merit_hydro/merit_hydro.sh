@@ -56,7 +56,7 @@ fi
 
 # check if no options were passed
 if [ $# -eq 0 ]; then
-  echo "ERROR $(basename $0): arguments missing";
+  echo "$(logDate)ERROR $(basename $0): arguments missing";
   exit 1;
 fi
 
@@ -85,14 +85,14 @@ do
 
     # in case of invalid option
     *)
-      echo "ERROR $(basename $0): invalid option '$1'";
+      echo "$(logDate)ERROR $(basename $0): invalid option '$1'";
       short_usage; exit 1 ;;
   esac
 done
 
 # check if $ensemble is provided
 if [[ -n "$startDate" ]] || [[ -n "$endDate" ]]; then
-  echo "ERROR $(basename $0): redundant argument (time extents) provided";
+  echo "$(logDate)ERROR $(basename $0): redundant argument (time extents) provided";
   exit 1;
 fi
 
@@ -132,7 +132,7 @@ load_core_modules () {
     module -q purge
     module -q load gcc/9.3.0
     module -q load r/4.1.2
-    module -q load gdal/3.4.1
+    module -q load gdal/3.0.4
     module -q load udunits/2.2.28
     module -q load geos/3.10.2
     module -q load proj/9.0.0
@@ -156,6 +156,9 @@ sort_comma_delimited () { IFS=',' read -ra arr <<< "$*"; echo ${arr[*]} | tr " "
 # MERIT-Hydro coordinate signs and digit style
 lat_sign () { if (( $* < 0 )); then printf "s%02g\n" $(echo "$*" | tr -d '-'); else printf "n%02g\n" "$*"; fi; }
 lon_sign () { if (( $* < 0 )); then printf "w%03g\n" $(echo "$*" | tr -d '-'); else printf "e%03g\n" "$*"; fi; }
+
+# log date format
+logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
 
 
 #######################################
@@ -290,14 +293,14 @@ subset_geotiff () {
 # Data Processing
 # ===============
 # display info
-echo "$(basename $0): processing MERIT-Hydro GeoTIFF(s)..."
+echo "$(logDate)$(basename $0): processing MERIT-Hydro GeoTIFF(s)..."
 
 # make the cache directory
-echo "$(basename $0): creating cache directory under $cache"
+echo "$(logDate)$(basename $0): creating cache directory under $cache"
 mkdir -p "$cache"
 
 # make the output directory
-echo "$(basename $0): creating output directory under $outputDir"
+echo "$(logDate)$(basename $0): creating output directory under $outputDir"
 mkdir -p "$outputDir" # making the output directory
 
 # extract shapefile extents if provided
@@ -310,7 +313,7 @@ fi
 
 # untar MERIT-Hydro files and build .vrt file out of them
 # for each variable
-echo "$(basename $0): untarring MERIT-Hydro variables under $cache"
+echo "$(logDate)$(basename $0): untarring MERIT-Hydro variables under $cache"
 for var in "${variables[@]}"; do
   # create temporary directories for each variable
   mkdir -p "$cache/$var"
@@ -323,7 +326,7 @@ done
 
 # subset and produce stats if needed
 if [[ "$printGeotiff" == "true" ]]; then
-  echo "$(basename $0): subsetting GeoTIFFs under $outputDir"
+  echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
   for var in "${variables[@]}"; do
     # subset based on lat and lon values
     subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${prefix}${var}.tif"
@@ -332,6 +335,7 @@ fi
 
 ## make R renv project directory
 if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
+  echo "$(logDate)$(basename $0): Extracting stats under $outputDir"
   mkdir -p "$cache/r-virtual-env/"
   ## make R renv in $cache
   virtualEnvPath="$cache/r-virtual-env/"
@@ -352,15 +356,15 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$shapefile" \
 	    "$outputDir/${prefix}stats_${var}.csv" \
 	    "$stats" \
-	    "$quantiles";
+	    "$quantiles" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;
   done
 fi
 
 # produce stats if required
-mkdir "$HOME/empty_dir"
-echo "$(basename $0): deleting temporary files from $cache"
+mkdir "$HOME/empty_dir" 
+echo "$(logDate)$(basename $0): deleting temporary files from $cache"
 rsync --quiet -aP --delete "$HOME/empty_dir/" "$cache"
 rm -r "$cache"
-echo "$(basename $0): temporary files from $cache are removed"
-echo "$(basename $0): results are produced under $outputDir."
+echo "$(logDate)$(basename $0): temporary files from $cache are removed"
+echo "$(logDate)$(basename $0): results are produced under $outputDir"
 

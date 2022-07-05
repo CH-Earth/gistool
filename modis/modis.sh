@@ -219,10 +219,6 @@ startYear="$(date --date="$startDate" +"%Y")"
 endYear="$(date --date="$endDate" +"%Y")"
 yearsRange=($(seq $startYear $endYear))
 
-echo "------"
-echo "${yearsRange[@]}"
-echo "======"
-
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
   # extract the shapefile extent

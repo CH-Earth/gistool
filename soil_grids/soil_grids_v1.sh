@@ -54,7 +54,7 @@ fi
 
 # check if no options were passed
 if [ $# -eq 0 ]; then
-  echo "$(logDate)ERROR $(basename $0): arguments missing";
+  echo "$(basename $0): ERROR! arguments missing";
   exit 1;
 fi
 
@@ -83,14 +83,14 @@ do
 
     # in case of invalid option
     *)
-      echo "$(logDate)ERROR $(basename $0): invalid option '$1'";
+      echo "$(basename $0): ERROR! invalid option '$1'";
       short_usage; exit 1 ;;
   esac
 done
 
 # check if $ensemble is provided
 if [[ -n "$startDate" ]] || [[ -n "$endDate" ]]; then
-  echo "$(logDate)ERROR $(basename $0): redundant argument (time extents) provided";
+  echo "$(basename $0): ERROR! redundant argument (time extents) provided";
   exit 1;
 fi
 

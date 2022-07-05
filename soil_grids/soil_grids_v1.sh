@@ -221,7 +221,7 @@ if [[ -n $shapefile ]]; then
   if [[ -n $sourceProj4 ]]; then
     :
   else
-    echo "$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI shapefile"
+    echo "$(logDate)$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI shapefile"
     sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
   fi
   

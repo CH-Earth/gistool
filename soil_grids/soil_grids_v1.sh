@@ -218,6 +218,13 @@ if [[ -n $shapefile ]]; then
   IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefile" | sed 's/[),(]//g' | grep Extent)"
   # transform the extents in case they are not in EPSG:4326
   IFS=':' read -ra sourceProj4 <<< "$(gdalsrsinfo $shapefile | grep -e "PROJ.4")" # source Proj4 value
+  if [[ -n $sourceProj4 ]]; then
+    :
+  else
+    echo "$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI shapefile"
+    sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
+  fi
+  
   # transform limits and assing to variables
   IFS=' ' read -ra leftBottomLims <<< $(echo "${shapefileExtents[@]:1:2}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
   IFS=' ' read -ra rightTopLims <<< $(echo "${shapefileExtents[@]:4:5}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
@@ -254,7 +261,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \
 	    "${virtualEnvPath}/renv.lock" \
-	    "${cache}/${var}.vrt" \
+	    "${geotiffDir}/${var}.tif" \
 	    "$shapefile" \
 	    "$outputDir/${prefix}stats_${var}.csv" \
 	    "$stats" \

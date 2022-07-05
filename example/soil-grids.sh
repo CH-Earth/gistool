@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This is a simple example to extract common statistics for the 
-# pfaf 71 (Saskatchewan-Nelson System) from the MERIT-Hydro rasters.
+# pfaf 71 (Saskatchewan-Nelson System) from the soil grids v1 rasters.
 
 # Always run call the script in the root directory of this repository
 cd ..

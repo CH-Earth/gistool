@@ -34,7 +34,7 @@ wget -m -nd -A "cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
   --variable="BDRICM_M_250m_ll,BLDFIE_M_sl4_250m_ll" \
   --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
   --print-geotiff=true \
-  --output-dir="/home/kasra545/scratch/soil-grids-test/" \
+  --output-dir="$HOME/scratch/soil-grids-test/" \
   --prefix="test_" \
   --stat="mean,min,max,median,quantile" \
   --quantile="0.1,0.5,0.9" \

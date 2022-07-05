@@ -38,5 +38,5 @@ wget -m -nd -A "cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
  --stat="min,max,mean,median,quantile"
  --quantile="0.1,0.5,0.9"
  --variable="elv,hnd" \
- --prefix="merit_test_";
-
+ --prefix="merit_test_" \
+ -j ;

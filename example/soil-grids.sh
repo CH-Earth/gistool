@@ -31,7 +31,7 @@ wget -m -nd -A -nv -q "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
      "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
 
 # implement subsetting and zonal statistics
-./extract-geotiff.sh --dataset="soil-grids-v1" \
+./extract-gis.sh --dataset="soil-grids-v1" \
   --dataset-dir="/project/rpp-kshook/Model_Output/SoilGridsV1/soilgrids/former/2017-03-10/data" \
   --variable="BDRICM_M_250m_ll,BLDFIE_M_sl4_250m_ll" \
   --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \

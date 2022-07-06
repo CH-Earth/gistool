@@ -31,7 +31,7 @@ wget -m -nd -A -nv -q "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
      "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
 
 # implement subsetting and zonal statistics
-./extract-geotiff.sh --dataset="modis" \
+./extract-gis.sh --dataset="modis" \
   --dataset-dir="/project/rpp-kshook/Model_Output/MODIS/" \
   --variable="MCD12Q1.006" \
   --start-date="2001-01-01" \

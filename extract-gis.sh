@@ -294,7 +294,7 @@ call_processing_func () {
 	#SBATCH --mail-user=$email
 	#SBATCH --mail-type=BEGIN,END,FAIL
 
-	srun ${scriptRun} 
+	srun ${scriptRun} --cache="${cache}-\${SLURM_JOB_ID}" 
 	EOF
     # echo message
     echo "$(basename $0): job submission details are printed under ${HOME}/scratch/.gdt_logs"

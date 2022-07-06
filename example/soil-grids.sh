@@ -34,7 +34,7 @@ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
 ./extract-gis.sh --dataset="soil-grids-v1" \
   --dataset-dir="/project/rpp-kshook/Model_Output/SoilGridsV1/soilgrids/former/2017-03-10/data" \
   --variable="BDRICM_M_250m_ll,BLDFIE_M_sl4_250m_ll" \
-  --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
   --print-geotiff=true \
   --output-dir="$HOME/scratch/soil-grids-test/" \
   --prefix="test_" \

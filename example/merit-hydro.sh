@@ -34,7 +34,7 @@ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
 ./extract-gis.sh  --dataset="merit-hydro" \
   --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
   --output-dir="$HOME/scratch/merit-hydro-test" \
-  --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
   --print-geotiff=true \
   --stat="min,max,mean,median,quantile" \
   --quantile="0.1,0.5,0.9" \

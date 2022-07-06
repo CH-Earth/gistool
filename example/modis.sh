@@ -36,7 +36,7 @@ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
   --variable="MCD12Q1.006" \
   --start-date="2001-01-01" \
   --end-date="2002-01-01" \
-  --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
   --print-geotiff=true \
   --output-dir="$HOME/scratch/modis-test/" \
   --prefix="test_" \

@@ -27,7 +27,7 @@ cd ..
 echo "The current directory is: $(pwd)"
 
 # first download a sample shapefile - could be any shapefile
-wget -m -nd -A -nv "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
+wget -m -nd -A -nv -q "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
      "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
 
 # implement subsetting and zonal statistics

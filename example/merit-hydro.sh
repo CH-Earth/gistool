@@ -3,7 +3,7 @@
 # Geospatial Dataset Processing Workflow
 # Copyright (C) 2022, University of Saskatchewan
 #
-# This file is part of Meteorological Data Processing Workflow
+# This file is part of the Geospatial Dataset Processing Workflow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,24 +19,27 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This is a simple example to extract common statistics for the 
-# pfaf 71 (Saskatchewan-Nelson System) from the MERIT-Hydro rasters.
+# pfaf 71 - Saskatchewan-Nelson System Shapefiles of MERIT-Basins -
+# from the MERIT-Hydro rasters.
 
-# Always run call the script in the root directory of this repository
+# Always call the script in the root directory of this repository
 cd ..
 echo "The current directory is: $(pwd)"
 
-# first download a sample shapefile
-wget -m -nd -A "cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
-		"http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"
+# first download a sample shapefile - could be any shapefile
+wget -m -nd -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
+		"http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/" \
+		> /dev/null;
 
 # implement subsetting and zonal statistics
 ./extract-gis.sh  --dataset="merit-hydro" \
- --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
- --output-dir="$HOME/scratch/merit-hydro-test" \
- --shape-file="./cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
- --print-geotiff=true \
- --stat="min,max,mean,median,quantile"
- --quantile="0.1,0.5,0.9"
- --variable="elv,hnd" \
- --prefix="merit_test_" \
- -j ;
+  --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
+  --output-dir="$HOME/scratch/merit-hydro-test" \
+  --shape-file="./cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --print-geotiff=true \
+  --stat="min,max,mean,median,quantile"
+  --quantile="0.1,0.5,0.9"
+  --variable="elv,hnd" \
+  --prefix="merit_test_" \
+  -j;
+

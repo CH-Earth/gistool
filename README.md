@@ -73,7 +73,7 @@ foo@bar:~$ ./extract-gis.sh  --dataset="merit-hydro" \
                              --prefix="merit_test_";
 
 ```
-See the [example](./example) directory for real-world scripts for each GeoTIFF dataset included in this repository.
+See the [example](./example) directory for real-world scripts for each geospatial dataset included in this repository.
 
 
 # New Datasets

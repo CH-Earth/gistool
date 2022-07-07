@@ -1,7 +1,7 @@
-# MERIT-Hydro Geospatial Dataset
+# `MERIT-Hydro` Geospatial Dataset
 In this file, the necessary technical details of the dataset is explained.
 
-## Location of the MERIT-Hydro Dataset Files
+## Location of the `MERIT-Hydro` Dataset Files
 The `MERIT-Hydro` geospatial dataset files are located under the following directory accessible from Digital Alliance (formerly Compute Canada) Graham cluster:
 
 ```console
@@ -85,5 +85,5 @@ This dataset has 6 main variables that are described in the following table:
 |5	|`wth`					|River Width				|		|
 |6	|`hnd`					|Height Above Nearest Drainage		|		|
 
-A description of all the variables included in this dataset is explained on the MERIT-Hydro's [website](http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro/).
+A description of all the variables included in this dataset is explained on the `MERIT-Hydro`'s [website](http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro/).
 

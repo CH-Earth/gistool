@@ -25,8 +25,6 @@
 # 2. General ideas of GeoTIFF subsetting are taken from https://github.com/CH-Earth/CWARHM
 #    developed mainly by Wouter Knoben (hence the header copyright credit). See the preprint
 #    at: https://www.essoar.org/doi/10.1002/essoar.10509195.1
-# 3. `merit_extent` function is adopted from: https://unix.stackexchange.com/a/168486/487495
-#     and https://unix.stackexchange.com/a/385175/487495
 
 
 # ================
@@ -47,7 +45,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n modis -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -69,8 +67,8 @@ do
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -v | --variable)      variables="$2"       ; shift 2 ;; # required
     -r | --crs)		  crs="$2"	       ; shift 2 ;; # required 
-    -s | --start-date)    startDate="$2"       ; shift 2 ;; # redundant - added for compatibility
-    -e | --end-date)      endDate="$2"         ; shift 2 ;; # redundant - added for compatibility
+    -s | --start-date)    startDate="$2"       ; shift 2 ;; # required
+    -e | --end-date)      endDate="$2"         ; shift 2 ;; # required
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
@@ -91,14 +89,15 @@ do
 done
 
 # check if $ensemble is provided
-if [[ -n "$startDate" ]] || [[ -n "$endDate" ]]; then
-  echo "$(basename $0): ERROR! redundant argument (time extents) provided";
-  exit 1;
+if [[ -z "$startDate" ]] || [[ -z "$endDate" ]]; then
+  echo "$(basename $0): Warning! time extents missing, considering full time range";
+  startDate="2001"
+  endDate="2020"
 fi
 
 # check the prefix if not set
 if [[ -z $prefix ]]; then
-  prefix="merit_hydro_"
+  prefix="modis_"
 fi
 
 # parse comma-delimited variables
@@ -121,7 +120,7 @@ renvPackagePath="${renvCache}/renv_0.15.5.tar.gz" # renv_0.15.5 source path
 # ==========================
 # Necessary Global Variables
 # ==========================
-# the structure of the original file names is as follows: "%{var}_%{s or n}%{lat}%{w or e}%{lon}.tar"
+# None
 
 
 # ===================
@@ -143,100 +142,11 @@ load_core_modules
 # =================
 # Useful One-liners
 # =================
-# MERIT-Hydro specific latitude and longitude limits
-merit_extent () { echo "define merit_extent_lat (x) \
-                      {if (x<0) { if (x%30 == 0) {return ((x/30)*30)} \
-                      else {return (((x/30)-1)*30) }} \
-                      else {return ((x/30)*30) } }; \
-		      merit_extent_lat($1)" | bc; }
-
 # sorting a comma-delimited string of real numbers
 sort_comma_delimited () { IFS=',' read -ra arr <<< "$*"; echo ${arr[*]} | tr " " "\n" | sort -n | tr "\n" " "; }
 
-# MERIT-Hydro coordinate signs and digit style
-lat_sign () { if (( $* < 0 )); then printf "s%02g\n" $(echo "$*" | tr -d '-'); else printf "n%02g\n" "$*"; fi; }
-lon_sign () { if (( $* < 0 )); then printf "w%03g\n" $(echo "$*" | tr -d '-'); else printf "e%03g\n" "$*"; fi; }
-
 # log date format
 logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
-
-
-#######################################
-# Parse latitute/longitude limits
-#
-# Globals:
-#   sortedArr: sorted ascendingly array 
-#	       of the input numbers
-#
-# Arguments:
-#   coordLims: comma-delimited string
-#	       of real numbers
-#
-# Outputs:
-#   sequence of integers echoed from an
-#   array.
-#######################################
-parse_coord_lims () {
-  # local variables
-  local coordLims="$@"
-  local limsSeq
-  local limSorted
-
-  # parsing the input string
-  IFS=' ' read -ra limsSorted <<< $(sort_comma_delimited "$coordLims")
-  # creating sequence of numbers
-  limSeq=($(seq $(merit_extent "${limsSorted[0]}") \
-                30 \
-                $(merit_extent "${limsSorted[1]}")) \
-        )
-  # echoing the `limSeq`
-  echo "${limSeq[@]}"
-}
-
-
-#######################################
-# extract original MERIT-Hydro `tar`s
-# for the latitude and longitude exten-
-# ts of interest.
-#
-# Globals:
-#   None
-#
-# Arguments:
-#   sourceDir: the path to the
-#	       sourceDir
-#   destDir: the path to the destinati-
-#	     on
-#   var: the name of the MERIT-Hydro
-#        dataset variable; MUST be one
-#        of the following: elv;dir;hnd
-#	 upa;upg;wth
-#
-# Outputs:
-#   untarred files produced under
-#   `$destDir`
-#######################################
-extract_merit_tar () {
-  # local variables
-  local sourceDir="$1" # source path
-  local destDir="$2" # destination path
-  local var="$3" # MERIT-Hydro variable
-  local lat # counter variable
-  local lon # counter variable
-
-  # create sequence of latitude and longitude values
-  local latSeq=($(parse_coord_lims "$latLims"))
-  local lonSeq=($(parse_coord_lims "$lonLims"))
-
-  # if rectangular subset is requested
-  for lat in "${latSeq[@]}"; do
-    for lon in "${lonSeq[@]}"; do
-      # strip-components to evade making 
-      # folder separately for each tar file
-      tar --strip-components=1 -xf "${sourceDir}/${var}/${var}_$(lat_sign ${lat})$(lon_sign ${lon}).tar" -C "${destDir}"
-    done
-  done
-}
 
 
 #######################################
@@ -249,7 +159,8 @@ extract_merit_tar () {
 #            limits
 #
 # Arguments:
-#   sourceVrt: source vrt file
+#   sourceVrt: source vrt file (or
+# 	       tif!)
 #   destPath: destionation path (inclu-
 #	      ding file name)
 #
@@ -293,7 +204,7 @@ subset_geotiff () {
 # Data Processing
 # ===============
 # display info
-echo "$(logDate)$(basename $0): processing MERIT-Hydro GeoTIFF(s)..."
+echo "$(logDate)$(basename $0): processing MODIS HDF(s)..."
 
 # make the cache directory
 echo "$(logDate)$(basename $0): creating cache directory under $cache"
@@ -302,6 +213,11 @@ mkdir -p "$cache"
 # make the output directory
 echo "$(logDate)$(basename $0): creating output directory under $outputDir"
 mkdir -p "$outputDir" # making the output directory
+
+# extract the start and end years
+startYear="$(date --date="$startDate" +"%Y")"
+endYear="$(date --date="$endDate" +"%Y")"
+yearsRange=($(seq $startYear $endYear))
 
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
@@ -324,27 +240,40 @@ if [[ -n $shapefile ]]; then
   latLims="${leftBottomLims[1]},${rightTopLims[1]}"
 fi
 
-# untar MERIT-Hydro files and build .vrt file out of them
-# for each variable
-echo "$(logDate)$(basename $0): untarring MERIT-Hydro variables under $cache"
+# build .vrt file out of annual MODIS HDFs for each of the $variables
+echo "$(logDate)$(basename $0): building virtual format (.vrt) of MODIS HDFs under $cache"
 for var in "${variables[@]}"; do
-  # create temporary directories for each variable
-  mkdir -p "$cache/$var"
-  # extract the `tar`s
-  extract_merit_tar "$geotiffDir" "${cache}/${var}" "$var"
-  # make .vrt out of each variable's GeoTIFFs
-  # ATTENTION: the second argument is not contained with quotation marks
-  gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
+  for yr in "${yearsRange[@]}"; do
+    # format year to conform to MODIS nomenclature
+    yrFormatted="${yr}.01.01"
+    
+    # create temporary directories for each variable
+    mkdir -p "${cache}/${var}"
+    
+    # make .vrt out of each variable's HDFs 
+    # ATTENTION: the second argument is not contained with quotation marks
+    gdalbuildvrt "${cache}/${var}/${yr}.vrt" ${geotiffDir}/${var}/${yrFormatted}/*.hdf -resolution highest -sd 1 > /dev/null
+    
+    # reproject .vrt to the standard EPSG:4326 projection
+    gdalwarp -of VRT -t_srs "EPSG:$crs" "${cache}/${var}/${yr}.vrt" "${cache}/${var}/${yr}_${crs}.vrt" > /dev/null
+  done
 done
 
 # subset and produce stats if needed
-if [[ "$printGeotiff" == "true" ]]; then
-  echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
-  for var in "${variables[@]}"; do
+echo "$(logDate)$(basename $0): subsetting HDFs in GeoTIFF format under $outputDir"
+# for each given year
+for var in "${variables[@]}"; do
+  mkdir -p ${outputDir}/${var}  
+  # for each year 
+  for yr in "${yearsRange[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${prefix}${var}.tif"
+    if [[ "$printGeotiff" == "true" ]]; then
+      subset_geotiff "${cache}/${var}/${yr}_${crs}.vrt" "${outputDir}/${var}/${prefix}${yr}.tif"
+    elif [[ "$printGeotiff" == "false" ]]; then
+      subset_geotiff "${cache}/${var}/${yr}_${crs}.vrt" "${cache}/${var}/${prefix}${yr}.tif"
+    fi
   done
-fi
+done
 
 ## make R renv project directory
 if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
@@ -355,21 +284,31 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
   ## load necessary modules - excessive, mainly for clarification
   load_core_modules
-  
-  # extract given stats for each variable
+
   for var in "${variables[@]}"; do
-    ## build renv and create stats
-    Rscript "$(dirname $0)/../assets/stats.R" \
-  	    "$exactextractrCache" \
-  	    "$renvPackagePath" \
-	    "$virtualEnvPath" \
-	    "$virtualEnvPath" \
-	    "${virtualEnvPath}/renv.lock" \
-	    "${cache}/${var}.vrt" \
-	    "$shapefile" \
-	    "$outputDir/${prefix}stats_${var}.csv" \
-	    "$stats" \
-	    "$quantiles" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;
+    # extract given stats for each variable
+
+    for yr in "${yearsRange[@]}"; do
+      # raster file path based on $printGeotiff value
+      if [[ "$printGeotiff" == "true" ]]; then
+        rasterPath="${outputDir}/${var}/${prefix}${yr}.tif"
+      elif [[ "$printGeotiff" == "false" ]]; then
+        rasterPath="${cache}/${var}/${prefix}${yr}.tif"
+      fi
+
+      ## build renv and create stats
+      Rscript "$(dirname $0)/../assets/stats.R" \
+  	      "$exactextractrCache" \
+  	      "$renvPackagePath" \
+	      "$virtualEnvPath" \
+	      "$virtualEnvPath" \
+	      "${virtualEnvPath}/renv.lock" \
+	      "$rasterPath" \
+	      "$shapefile" \
+	      "$outputDir/${var}/${prefix}stats_${var}_${yr}.csv" \
+	      "$stats" \
+	      "$quantiles" >> "${outputDir}/${var}/${prefix}stats_${var}_${yr}.log" 2>&1;
+    done
   done
 fi
 

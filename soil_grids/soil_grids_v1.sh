@@ -25,8 +25,6 @@
 # 2. General ideas of GeoTIFF subsetting are taken from https://github.com/CH-Earth/CWARHM
 #    developed mainly by Wouter Knoben (hence the header copyright credit). See the preprint
 #    at: https://www.essoar.org/doi/10.1002/essoar.10509195.1
-# 3. `merit_extent` function is adopted from: https://unix.stackexchange.com/a/168486/487495
-#     and https://unix.stackexchange.com/a/385175/487495
 
 
 # ================
@@ -47,7 +45,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n soil-grids-v1 -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -98,7 +96,7 @@ fi
 
 # check the prefix if not set
 if [[ -z $prefix ]]; then
-  prefix="merit_hydro_"
+  prefix="soil_grids_v1_"
 fi
 
 # parse comma-delimited variables
@@ -121,7 +119,11 @@ renvPackagePath="${renvCache}/renv_0.15.5.tar.gz" # renv_0.15.5 source path
 # ==========================
 # Necessary Global Variables
 # ==========================
-# the structure of the original file names is as follows: "%{var}_%{s or n}%{lat}%{w or e}%{lon}.tar"
+# the structure of the original file names are one of the following:
+#     * %{var}_M_sl%{soil_layer_depth_number}_250m_ll.tif
+#     * %{var}_250m_ll.tif
+# but the user is expected to include complete variable (file) name in the 
+# `--variable` input argument comma-separated list.
 
 
 # ===================
@@ -143,100 +145,11 @@ load_core_modules
 # =================
 # Useful One-liners
 # =================
-# MERIT-Hydro specific latitude and longitude limits
-merit_extent () { echo "define merit_extent_lat (x) \
-                      {if (x<0) { if (x%30 == 0) {return ((x/30)*30)} \
-                      else {return (((x/30)-1)*30) }} \
-                      else {return ((x/30)*30) } }; \
-		      merit_extent_lat($1)" | bc; }
-
 # sorting a comma-delimited string of real numbers
 sort_comma_delimited () { IFS=',' read -ra arr <<< "$*"; echo ${arr[*]} | tr " " "\n" | sort -n | tr "\n" " "; }
 
-# MERIT-Hydro coordinate signs and digit style
-lat_sign () { if (( $* < 0 )); then printf "s%02g\n" $(echo "$*" | tr -d '-'); else printf "n%02g\n" "$*"; fi; }
-lon_sign () { if (( $* < 0 )); then printf "w%03g\n" $(echo "$*" | tr -d '-'); else printf "e%03g\n" "$*"; fi; }
-
 # log date format
 logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
-
-
-#######################################
-# Parse latitute/longitude limits
-#
-# Globals:
-#   sortedArr: sorted ascendingly array 
-#	       of the input numbers
-#
-# Arguments:
-#   coordLims: comma-delimited string
-#	       of real numbers
-#
-# Outputs:
-#   sequence of integers echoed from an
-#   array.
-#######################################
-parse_coord_lims () {
-  # local variables
-  local coordLims="$@"
-  local limsSeq
-  local limSorted
-
-  # parsing the input string
-  IFS=' ' read -ra limsSorted <<< $(sort_comma_delimited "$coordLims")
-  # creating sequence of numbers
-  limSeq=($(seq $(merit_extent "${limsSorted[0]}") \
-                30 \
-                $(merit_extent "${limsSorted[1]}")) \
-        )
-  # echoing the `limSeq`
-  echo "${limSeq[@]}"
-}
-
-
-#######################################
-# extract original MERIT-Hydro `tar`s
-# for the latitude and longitude exten-
-# ts of interest.
-#
-# Globals:
-#   None
-#
-# Arguments:
-#   sourceDir: the path to the
-#	       sourceDir
-#   destDir: the path to the destinati-
-#	     on
-#   var: the name of the MERIT-Hydro
-#        dataset variable; MUST be one
-#        of the following: elv;dir;hnd
-#	 upa;upg;wth
-#
-# Outputs:
-#   untarred files produced under
-#   `$destDir`
-#######################################
-extract_merit_tar () {
-  # local variables
-  local sourceDir="$1" # source path
-  local destDir="$2" # destination path
-  local var="$3" # MERIT-Hydro variable
-  local lat # counter variable
-  local lon # counter variable
-
-  # create sequence of latitude and longitude values
-  local latSeq=($(parse_coord_lims "$latLims"))
-  local lonSeq=($(parse_coord_lims "$lonLims"))
-
-  # if rectangular subset is requested
-  for lat in "${latSeq[@]}"; do
-    for lon in "${lonSeq[@]}"; do
-      # strip-components to evade making 
-      # folder separately for each tar file
-      tar --strip-components=1 -xf "${sourceDir}/${var}/${var}_$(lat_sign ${lat})$(lon_sign ${lon}).tar" -C "${destDir}"
-    done
-  done
-}
 
 
 #######################################
@@ -293,11 +206,7 @@ subset_geotiff () {
 # Data Processing
 # ===============
 # display info
-echo "$(logDate)$(basename $0): processing MERIT-Hydro GeoTIFF(s)..."
-
-# make the cache directory
-echo "$(logDate)$(basename $0): creating cache directory under $cache"
-mkdir -p "$cache"
+echo "$(logDate)$(basename $0): processing Soil-Grids-v1 GeoTIFF(s)..."
 
 # make the output directory
 echo "$(logDate)$(basename $0): creating output directory under $outputDir"
@@ -324,25 +233,12 @@ if [[ -n $shapefile ]]; then
   latLims="${leftBottomLims[1]},${rightTopLims[1]}"
 fi
 
-# untar MERIT-Hydro files and build .vrt file out of them
-# for each variable
-echo "$(logDate)$(basename $0): untarring MERIT-Hydro variables under $cache"
-for var in "${variables[@]}"; do
-  # create temporary directories for each variable
-  mkdir -p "$cache/$var"
-  # extract the `tar`s
-  extract_merit_tar "$geotiffDir" "${cache}/${var}" "$var"
-  # make .vrt out of each variable's GeoTIFFs
-  # ATTENTION: the second argument is not contained with quotation marks
-  gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
-done
-
 # subset and produce stats if needed
 if [[ "$printGeotiff" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
   for var in "${variables[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${prefix}${var}.tif"
+    subset_geotiff "${geotiffDir}/${var}.tif" "${outputDir}/${prefix}${var}.tif"
   done
 fi
 
@@ -365,7 +261,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \
 	    "${virtualEnvPath}/renv.lock" \
-	    "${cache}/${var}.vrt" \
+	    "${geotiffDir}/${var}.tif" \
 	    "$shapefile" \
 	    "$outputDir/${prefix}stats_${var}.csv" \
 	    "$stats" \
@@ -373,7 +269,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   done
 fi
 
-# produce stats if required
+# remove unnecessary files 
 mkdir "$HOME/empty_dir" 
 echo "$(logDate)$(basename $0): deleting temporary files from $cache"
 rsync --quiet -aP --delete "$HOME/empty_dir/" "$cache"

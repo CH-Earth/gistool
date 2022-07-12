@@ -59,16 +59,16 @@ As an example, follow the code block below. Please remember that you MUST have a
 foo@bar:~$ git clone https://github.com/kasra-keshavarz/gistool # clone the repository
 foo@bar:~$ cd ./gistool/ # always move to the repository's directory
 foo@bar:~$ ./extract-gis.sh -h # view the usage message
-foo@bar:~$ wget -m -nd -A "cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
-		"http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"
+foo@bar:~$ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
+	        "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
 	        # downloading a sample shapefile
 foo@bar:~$ ./extract-gis.sh  --dataset="merit-hydro" \
                              --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
                              --output-dir="$HOME/scratch/merit-hydro-test" \
 			     --shape-file="./cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
 			     --print-geotiff=true \
-			     --stat="min,max,mean,median,quantile"
-			     --quantile="0.1,0.5,0.9"
+			     --stat="min,max,mean,median,quantile" \
+			     --quantile="0.1,0.5,0.9" \
                              --variable="elv,hnd" \
                              --prefix="merit_test_";
 

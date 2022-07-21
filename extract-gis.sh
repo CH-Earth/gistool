@@ -287,7 +287,7 @@ call_processing_func () {
 	#SBATCH --nodes=1
 	#SBATCH --account=rpp-kshook
 	#SBATCH --time=04:00:00
-	#SBATCH --mem=8GB
+	#SBATCH --mem=16GB
 	#SBATCH --job-name=GWF_${scriptName}
 	#SBATCH --error=$HOME/scratch/.gdt_logs/GWF_%j_err.txt
 	#SBATCH --output=$HOME/scratch/.gdt_logs/GWF_%j.txt

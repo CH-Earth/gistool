@@ -296,8 +296,14 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
         rasterPath="${cache}/${var}/${prefix}${yr}.tif"
       fi
 
+      ## make the temporary directory for installing r packages
+      tempInstallPath="$cache/r-packages"
+      mkdir -p "$tempInstallPath"
+      export R_LIBS_USER="$tempInstallPath"
+
       ## build renv and create stats
       Rscript "$(dirname $0)/../assets/stats.R" \
+      	      "$tempInstallPath" \
   	      "$exactextractrCache" \
   	      "$renvPackagePath" \
 	      "$virtualEnvPath" \

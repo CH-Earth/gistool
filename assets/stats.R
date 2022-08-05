@@ -20,22 +20,24 @@
 args <- commandArgs();
 
 # assigning variables to input arguments
-exactextractr_cache_path <- args[6]; 
-renv_source_package <- args[7]; 
-virtual_env_path <- args[8];
-working_dir_path <- args[9];
-lockfile_path <- args[10];
-vrt_path <- args[11];
-shapefile_path <- args[12];
-output_path <- args[13];
-stats <- args[14];
-quantiles <- args[15];
+temp_install_path <- args[6];
+exactextractr_cache_path <- args[7]; 
+renv_source_package <- args[8]; 
+virtual_env_path <- args[9];
+working_dir_path <- args[10];
+lockfile_path <- args[11];
+vrt_path <- args[12];
+shapefile_path <- args[13];
+output_path <- args[14];
+stats <- args[15];
+quantiles <- args[16];
 
 # set the working directory path
 setwd(working_dir_path)
 
 # set cache and initialize the environment, i.e., `renv`
 Sys.setenv("RENV_PATHS_CACHE"=exactextractr_cache_path);
+Sys.getenv("R_LIBS_USER")
 install.packages(renv_source_package, repos=NULL, type="source", quiet=TRUE);
 renv::activate(virtual_env_path);
 renv::restore(lockfile=lockfile_path, prompt=FALSE);

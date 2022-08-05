@@ -355,12 +355,18 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
   ## load necessary modules - excessive, mainly for clarification
   load_core_modules
+
+  ## make the temporary directory for installing r packages
+  tempInstallPath="$cache/r-packages"
+  mkdir -p "$tempInstallPath"
+  export R_LIBS_USER="$tempInstallPath"
   
   # extract given stats for each variable
   for var in "${variables[@]}"; do
     ## build renv and create stats
     Rscript "$(dirname $0)/../assets/stats.R" \
-  	    "$exactextractrCache" \
+	    "$tempInstallPath" \
+	    "$exactextractrCache" \
   	    "$renvPackagePath" \
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \

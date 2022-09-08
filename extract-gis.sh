@@ -325,6 +325,11 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/modis/modis.sh"
     ;;
 
+  # Depth to Bedrock
+  "depth-to-bedrock" | "depth_to_bedrock" | "dtb" | "depth-to_bedrock" | "depth_to_bedrock")
+    call_processing_func "$(dirname $0)/depth_to_bedrock/depth_to_bedrock.sh"
+    ;;
+
   # dataset not included above
   *)
     echo "$(basename $0): missing/unknown dataset";

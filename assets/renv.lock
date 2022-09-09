@@ -160,6 +160,14 @@
         "nlme"
       ]
     },
+    "ncdf4": {
+      "Package": "ncdf4",
+      "Version": "1.19",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7c902f18c0be04c8767b94019ffe8063",
+      "Requirements": []
+    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-153",

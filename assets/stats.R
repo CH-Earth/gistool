@@ -45,6 +45,16 @@ renv::restore(lockfile=lockfile_path, prompt=FALSE);
 # produce necessary stats and print a csv file
 r <- raster::raster(vrt_path);
 p <- sf::st_read(shapefile_path, quiet=TRUE);
+
+# check the CRS of the shapefile
+if (is.na(sf::st_crs(p)$epsg)){
+  sf::st_crs(p) = 4326;
+  print('Assuming EPSG is 4326');
+} else {
+  sf::st_transform(p, 4326);
+  print('Transforming EPSG to 4326');
+}
+
 q <- as.double(unlist(strsplit(quantiles, ",")));
 s <- unlist(strsplit(stats, ","));
 df <- cbind(p[[1]], exactextractr::exact_extract(r, p, s, quantiles=q)); # assuming first column indicates ID

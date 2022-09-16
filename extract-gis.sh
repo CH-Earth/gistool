@@ -325,6 +325,11 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/modis/modis.sh"
     ;;
 
+  # Landsar
+  "landsat" | "landast" )
+    call_processing_func "$(dirname $0)/landsat/landsat.sh"
+    ;;
+
   # dataset not included above
   *)
     echo "$(basename $0): missing/unknown dataset";

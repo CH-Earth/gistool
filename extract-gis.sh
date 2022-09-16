@@ -325,6 +325,11 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/modis/modis.sh"
     ;;
 
+  # GSDE
+  "gsde")
+    call_processing_func "$(dirname $0)/gsde/gsde.sh"
+    ;;
+
   # dataset not included above
   *)
     echo "$(basename $0): missing/unknown dataset";

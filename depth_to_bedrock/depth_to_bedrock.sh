@@ -239,7 +239,7 @@ if [[ "$printGeotiff" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
   for var in "${variables[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}.tif" "${outputDir}/${prefix}${var}.tif"
+    subset_geotiff "${geotiffDir}/${var}.tif" "${outputDir}/${prefix}${var}.tif"
   done
 fi
 
@@ -268,7 +268,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \
 	    "${virtualEnvPath}/renv.lock" \
-	    "${cache}/${var}.tif" \
+	    "${geotiffDir}/${var}.tif" \
 	    "$shapefile" \
 	    "$outputDir/${prefix}stats_${var}.csv" \
 	    "$stats" \

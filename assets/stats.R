@@ -41,9 +41,14 @@ Sys.getenv("R_LIBS_USER")
 install.packages(renv_source_package, repos=NULL, type="source", quiet=TRUE);
 renv::activate(virtual_env_path);
 renv::restore(lockfile=lockfile_path, prompt=FALSE);
+print('here!')
 
 # produce necessary stats and print a csv file
-r <- raster::raster(vrt_path);
+if (tools::file_ext(vrt_path) == 'nc') {
+  r <- terra::rast(vrt_path)
+} else {
+  r <- raster::raster(vrt_path);
+}
 p <- sf::st_read(shapefile_path, quiet=TRUE);
 
 # check the CRS of the shapefile

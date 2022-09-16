@@ -213,11 +213,6 @@ echo "$(logDate)$(basename $0): creating output directory under $outputDir"
 mkdir -p "$outputDir" # making the output directory
 mkdir -p "$cache" # making the cache directory
 
-# extracting the zip file
-for var in "${variables[@]}"; do
-  unzip "${geotiffDir}/${var}" -d "$cache"
-done
-
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
   # extract the shapefile extent

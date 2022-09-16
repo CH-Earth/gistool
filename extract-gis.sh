@@ -325,15 +325,19 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/modis/modis.sh"
     ;;
 
-<<<<<<< HEAD
   # GSDE
   "gsde")
     call_processing_func "$(dirname $0)/gsde/gsde.sh"
-=======
-  # Landsar
+    ;;
+  
+  # Depth to Bedrock
+  "depth-to-bedrock" | "depth_to_bedrock" | "dtb" | "depth-to_bedrock" | "depth_to_bedrock")
+    call_processing_func "$(dirname $0)/depth_to_bedrock/depth_to_bedrock.sh"
+    ;;
+  
+  # Landsat
   "landsat" | "landast" )
     call_processing_func "$(dirname $0)/landsat/landsat.sh"
->>>>>>> origin/main
     ;;
 
   # dataset not included above

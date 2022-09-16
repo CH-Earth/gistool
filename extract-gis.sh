@@ -325,7 +325,12 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/modis/modis.sh"
     ;;
 
-  # Landsar
+  # Depth to Bedrock
+  "depth-to-bedrock" | "depth_to_bedrock" | "dtb" | "depth-to_bedrock" | "depth_to_bedrock")
+    call_processing_func "$(dirname $0)/depth_to_bedrock/depth_to_bedrock.sh"
+    ;;
+  
+  # Landsat
   "landsat" | "landast" )
     call_processing_func "$(dirname $0)/landsat/landsat.sh"
     ;;

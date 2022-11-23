@@ -43,7 +43,7 @@ renv::activate(virtual_env_path);
 renv::restore(lockfile=lockfile_path, prompt=FALSE);
 
 # load necessary libraries
-library(dplyr)
+library(dplyr, quietly=TRUE)
 
 # produce necessary stats and print a csv file
 if (tools::file_ext(vrt_path) == 'nc') {

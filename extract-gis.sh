@@ -340,6 +340,11 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/landsat/landsat.sh"
     ;;
 
+  # soil_class
+  "soil_class" )
+    call_processing_func "$(dirname $0)/soil_class/soil_class.sh"
+    ;;
+
   # dataset not included above
   *)
     echo "$(basename $0): missing/unknown dataset";

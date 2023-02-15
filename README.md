@@ -50,7 +50,7 @@ Script options:
 |**1**|MODIS			     		   |2000 - 2021           |	|10.5067/MODIS/MCD12Q1.006	|[link](modis)	      |
 |**2**|MERIT Hydro		     		   |Not Applicable (N/A)  |4326	|10.1029/2019WR024873		|[link](merit_hydro)  |
 |**3**|Soil Grids (v1)				   |Not Applicable (N/A)  |4326	|10.1371/journal.pone.0169748	|[link](soil_grids)   |
-|**4**|Landsat NALCMS (2010, 30m)		   |Not Applicable (N/A)  |4326 |10.3390/rs9111098		|[link](landsat)      |
+|**4**|Landsat NALCMS				   |2010 and 2015	  |4326 |10.3390/rs9111098		|[link](landsat)      |
 |**5**|Global Depth to Bedrock			   |Not Applicable (N/A)  |     |10.1002/2016MS000686		|[link](depth_to_bedrock) |
 
 

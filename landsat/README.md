@@ -20,14 +20,14 @@ And the structure of the files is as following:
 
 ## Spatial and Temporal Extents
 
-The spatial extent of this dataset (so far only `NALCMS` that is a land cover dataset) covers longitudes from approximately `-180` to `-50` degress and latitudes from approximately `+14` to `+84` degress. This dataset is static and does not vary with time. 
+The spatial extent of this dataset (so far only `NALCMS` that is a land cover dataset) covers longitudes from approximately `-180` to `-50` degress and latitudes from approximately `+14` to `+84` degress. This dataset is available for 2010 and 2015. Furthermore, one static dataset variable is also included demonstrating the gains and losses of various land covers between 2010 and 2015. Please see the list of variables for more information.
 
 ## Dataset Variables
 This variables of this dataset are detailed in the table below:
 
 |#	|Variable Name (used in `gistool`)	|Description					|Comments	|
 |-------|---------------------------------------|-----------------------------------------------|---------------|
-|1      |land-cover				|Land cover classes				|[2010 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/) and [2015 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2015-landsat-and-rapideye/)|
+|1      |land-cover				|Land cover classes for 2010 and 2015		|[2010 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/) and [2015 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2015-landsat-and-rapideye/)|
 |2	|land-cover-change			|Land cover change (between 2010 and 2015)	|[2010-2015 difference info](http://www.cec.org/north-american-environmental-atlas/land-cover-change-30m-2010-2015-landsat/)|
 
 

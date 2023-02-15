@@ -12,10 +12,10 @@ And the structure of the files is as following:
 
 ```console
 /project/rpp-kshook/Model_Output/Landsat/
-├── NA_NALCMS_2010_v2_land_cover_30m.zip
-├── .
-├── .
-└── .
+├── land_change_2010v2_2015v2_30m_tif.zip 
+├── land_cover_2010v2_30m_tif.zip
+├── land_cover_2015v2_30m_tif.zip
+└── dl-landcover.sh
 ```
 
 ## Spatial and Temporal Extents
@@ -25,9 +25,10 @@ The spatial extent of this dataset (so far only `NALCMS` that is a land cover da
 ## Dataset Variables
 This variables of this dataset are detailed in the table below:
 
-|#	|Variable Name (used in `gistool`)	|Description				|Comments	|
-|-------|---------------------------------------|---------------------------------------|---------------|
-|1      |NA_NALCMS_2010_v2_land_cover_30m       |Land cover classes			|[link](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/)|
+|#	|Variable Name (used in `gistool`)	|Description					|Comments	|
+|-------|---------------------------------------|-----------------------------------------------|---------------|
+|1      |land-cover				|Land cover classes				|[2010 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/) and [2015 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2015-landsat-and-rapideye/)|
+|2	|land-cover-change			|Land cover change (between 2010 and 2015)	|[2010-2015 difference info](http://www.cec.org/north-american-environmental-atlas/land-cover-change-30m-2010-2015-landsat/)|
 
 
 # Other relevant information
@@ -58,3 +59,50 @@ Below the land cover types for each values of the `.tif` files is detailed based
 
 Also, the details of the above table has been included in the following files: [landsat_classes.csv](./landsat_classes.csv).
 
+## Land Cover Changes between 2010 and 2015
+The following file contains the following GeoTIFF data:
+```console
+/project/rpp-kshook/Model_Output/Landsat/land_change_2010v2_2015v2_30m_tif.zip
+├── NA_NALCMS_2010v2_2015v2_30m_barren_land_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_cropland_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_forest_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_grassland_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_shrubland_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_snow_ice_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_urban_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_water_loss_and_gain.tif
+├── NA_NALCMS_2010v2_2015v2_30m_wetland_loss_and_gain.tif
+└── NA_NALCMS_land_change_2010v2_2015v2_30m.tif
+```
+
+Based on the metadata also available in the mentioned .zip file, the GeoTIFF data containing the `*_land_loss_and_gain.tif` phrase in their file name contain "[g]eneral land cover gains an losses [...] at the North American scale [...] for the following land cover class groups:"
+
+  1. Forest
+  2. Shrubland
+  3. Grassland
+  4. Wetland
+  5. Cropland
+  6. Barren Land
+  7. Urban and Built-up
+  8. Water
+  9. Snow and Ice   
+
+And, the pixel values of the mentioned `.tif` files are as following:
+
+|#	|Pixel Value |Value Description |
+|-------|------------|------------------|
+|1	|1	     |Gain	        |
+|2	|2	     |Loss	        |
+
+Furthermore, the GeoTIFF data named `NA_NALCMS_land_change_2010v2_2015v2_30m.tif` also contains the landcover change data. Each pixel value of the GeoTIFF file contains information regarding transformations between different landcover classes of the dataset at the North American scale. Each pixel values of the file contains three or four digits, with "[t]he first one or two digits in each pixel value show the land cover class in 2010, while the third and four digits show the land cover class in 2015." An example of digit values are given in the following:
+
+```
+105   = Class 1 to 5	"Temperate or sub-polar needleleaf forest" to "Temperate or sub-polar broadleaf deciduous forest"
+206   = Class 2 to 6	"Sub-polar taiga needleleaf forest" to "Mixed forest"
+814   = Class 8 to 14	"Temperate or sub-polar shrubland" to "Wetland"
+915   = Class 9 to 15	"Tropical or sub-tropical grassland" to "Cropland"
+1018  = Class 10 to 18	"Temperate or sub-polar grassland" to "Water"
+1502  = Class 15 to 02	"Cropland" to "Sub-polar taiga needleleaf forest"
+1716  = Class 17 to 16	"Urban and built-up" to "Barren land"
+1913  = Class 19 to 01	"Snow and ice" to "Sub-polar or polar barren-lichen-moss"
+```

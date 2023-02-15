@@ -76,7 +76,7 @@ The following file contains the following GeoTIFF data:
 ```
 
 Based on the metadata also available in the mentioned .zip file, the GeoTIFF data containing the `*_land_loss_and_gain.tif` phrase in their file name contain "[g]eneral land cover gains an losses [...] at the North American scale [...] for the following land cover class groups:"
-
+```
   1. Forest
   2. Shrubland
   3. Grassland
@@ -86,6 +86,7 @@ Based on the metadata also available in the mentioned .zip file, the GeoTIFF dat
   7. Urban and Built-up
   8. Water
   9. Snow and Ice   
+```
 
 And, the pixel values of the mentioned `.tif` files are as following:
 

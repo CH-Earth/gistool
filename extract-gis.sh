@@ -1,8 +1,9 @@
 #!/bin/bash
-# GeoTIFF Processing Workflow
-# Copyright (C) 2022, University of Saskatchewan
+# Geospatial Data Processing Workflow
+# Copyright (C) 2022-2023, University of Saskatchewan
+# Copyright (C) 2023, University of Calgary
 #
-# This file is part of GeoTIFF Processing Workflow
+# This file is part of Geospatial Data Processing Workflow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -288,9 +289,9 @@ call_processing_func () {
 	#SBATCH --account=rpp-kshook
 	#SBATCH --time=04:00:00
 	#SBATCH --mem=16GB
-	#SBATCH --job-name=GWF_${scriptName}
-	#SBATCH --error=$HOME/scratch/.gdt_logs/GWF_%j_err.txt
-	#SBATCH --output=$HOME/scratch/.gdt_logs/GWF_%j.txt
+	#SBATCH --job-name=GIS_${scriptName}
+	#SBATCH --error=$HOME/scratch/.gdt_logs/GIS_%j_err.txt
+	#SBATCH --output=$HOME/scratch/.gdt_logs/GIS_%j.txt
 	#SBATCH --mail-user=$email
 	#SBATCH --mail-type=BEGIN,END,FAIL
 

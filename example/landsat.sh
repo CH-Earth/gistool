@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Geospatial Dataset Processing Workflow
-# Copyright (C) 2022, University of Saskatchewan
+# Copyright (C) 2022-2023, University of Saskatchewan
+# Copyright (C) 2023, University of Calgary
 #
 # This file is part of the Geospatial Dataset Processing Workflow
 #

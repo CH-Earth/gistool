@@ -55,7 +55,7 @@ Script options:
 
 
 # General Example 
-As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Compute Canada (CC) and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
+As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Digital Alliance of Canada and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
 
 ```console
 foo@bar:~$ git clone https://github.com/kasra-keshavarz/gistool # clone the repository
@@ -88,7 +88,8 @@ Please open a new ticket on the **Issues** tab of the current repository in case
 
 # License
 Geospatial Dataset Processing Workflow<br>
-Copyright (C) 2022, University of Saskatchewan<br>
+Copyright (C) 2022-2023, University of Saskatchewan<br>
+Copyright (C) 2023, University of Calgary<br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

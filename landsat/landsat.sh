@@ -1,9 +1,9 @@
 #!/bin/bash
-# GIS Data Processing Workflow
-# Copyright (C) 2022, University of Saskatchewan
+# Geospatial Data Processing Workflow
+# Copyright (C) 2022-2023, University of Saskatchewan
 # Copyright (C) 2023, University of Calgary
 #
-# This file is part of GIS Data Processing Workflow
+# This file is part of Geospatial Data Processing Workflow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

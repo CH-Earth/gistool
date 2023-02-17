@@ -31,7 +31,8 @@ vrt_path <- args[12];
 shapefile_path <- args[13];
 output_path <- args[14];
 stats <- args[15];
-quantiles <- args[16];
+include_na <- args[16];
+quantiles <- args[17];
 
 # set the working directory path
 setwd(working_dir_path)
@@ -75,11 +76,21 @@ if (coord_var %in% s) {
 } else {
   include_coords = FALSE
 }
+
 # extract ID column name
 id_col <- names(p[1])[1]
 
+# check `na_values`
+if (include_na == 'true') {
+  na_values = 9999
+  print('Including NA values');
+} else {
+  na_values = NA_real_
+  print('NOT including NA values');
+}
+
 # run exactextractr and calculate necessary stats
-df <- exactextractr::exact_extract(r, p, s, quantiles=q, append_cols=id_col); # assuming first column indicates ID
+df <- exactextractr::exact_extract(r, p, s, default_value=na_values, quantiles=q, append_cols=id_col); # assuming first column indicates ID
 
 # extract centroid coordinates and prepend to `df`
 if (include_coords == TRUE) {

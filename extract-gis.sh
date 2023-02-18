@@ -36,7 +36,7 @@
 # Help functions
 # ==============
 usage () {
-  echo "GISTOOL: Geospatial Dataset Processing Script
+  echo "GISTOOL: Geospatial Data Processing Script
 
 Usage:
   extract-gis [options...]
@@ -44,7 +44,8 @@ Usage:
 Script options:
   -d, --dataset				Geospatial dataset of interest, currently
                                         available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1'
+                                        'MERIT-Hydro';'SoilGridsV1';'Landsat';
+					'gsde';'depth-to-bedrock';
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -66,7 +67,9 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; optional
+					'coords'; 'count'; optional
+  -u, --include-na			Include NA values in generated statistics;
+  					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
   					is included in the '--stat' argument. The values
 					must be comma delimited float numbers between
@@ -74,18 +77,18 @@ Script options:
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
-  					finishes; optional
+  					fails; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 
-For bug reports, questions, discussions open an issue
+For bug reports, questions, and discussions open an issue
 at https://github.com/kasra-keshavarz/gistool/issues" >&1;
 
   exit 0;
 }
 
 short_usage () {
-  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhE] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH} [-p STR] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] " >&1;
+  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhEu] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH] [-p STR] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] " >&1;
 }
 
 version () {
@@ -107,8 +110,11 @@ shopt -s expand_aliases
 # =======================
 # Parsing input arguments
 # =======================
-# argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:q:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,quantile:,prefix:,cache:,email:,version,help -- "$@")
+# argument parsing using getopt - 
+# ATTENTION: `getopt` is available by default on most GNU/Linux 
+#	     distributions, however, it may not work out of the
+#	     box on MacOS or BSD
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:uq:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,email:,version,help -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -140,6 +146,7 @@ do
     -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # optional
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -u | --include-na)	  includeNA=true       ; shift	 ;; # optional
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
@@ -172,6 +179,11 @@ fi
 # if $printGeotiff is not triggered
 if [[ -z $printGeotiff ]]; then
   printGeotiff=true
+fi
+
+# if $includeNA is not triggered
+if [[ -z $includeNA ]]; then
+  includeNA=false
 fi
 
 # check the value of $printGeotiff
@@ -254,6 +266,7 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 		     [jobSubmission]="$jobSubmission" \
 		     [printGeotiff]="$printGeotiff" \
 		     [stats]="$stats" \
+		     [includeNA]="$includeNA" \
 		     [quantiles]="$quantiles" \
 		     [prefixStr]="$prefixStr" \
 		     [cache]="$cache" \
@@ -274,13 +287,14 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --include-na="${funcArgs[includeNA]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
 	EOF
 
   # evaluate the script file using the arguments provided
   if [[ "${funcArgs[jobSubmission]}" == true ]]; then
     # Create a temporary directory for keeping job logs
-    mkdir -p "$HOME/scratch/.gdt_logs"
+    logDir="$HOME/scratch/.gistool_logs/"
+    mkdir -p "$logDir" 
     # SLURM batch file
     sbatch <<- EOF
 	#!/bin/bash
@@ -290,15 +304,15 @@ call_processing_func () {
 	#SBATCH --time=04:00:00
 	#SBATCH --mem=16GB
 	#SBATCH --job-name=GIS_${scriptName}
-	#SBATCH --error=$HOME/scratch/.gdt_logs/GIS_%j_err.txt
-	#SBATCH --output=$HOME/scratch/.gdt_logs/GIS_%j.txt
+	#SBATCH --error=$logDir/GIS_%j_err.txt
+	#SBATCH --output=$logDir/GIS_%j.txt
 	#SBATCH --mail-user=$email
 	#SBATCH --mail-type=BEGIN,END,FAIL
 
 	srun ${scriptRun} --cache="${cache}-\${SLURM_JOB_ID}" 
 	EOF
     # echo message
-    echo "$(basename $0): job submission details are printed under ${HOME}/scratch/.gdt_logs"
+    echo "$(basename $0): job submission details are printed under ${logDir}"
  
   else
     eval "$scriptRun"

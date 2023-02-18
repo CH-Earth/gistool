@@ -8,7 +8,8 @@ Usage:
 Script options:
   -d, --dataset				Geospatial dataset of interest, currently
                                         available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1'
+                                        'MERIT-Hydro';'SoilGridsV1';'Landsat';
+					'gsde';'depth-to-bedrock';
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -30,7 +31,9 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; optional
+					'coords'; 'count'; optional
+  -u, --include-na			Include NA values in generated statistics;
+  					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
   					is included in the '--stat' argument. The values
 					must be comma delimited float numbers between
@@ -38,7 +41,7 @@ Script options:
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
-  					finishes; optional
+  					fails; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 ```

@@ -45,7 +45,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n depth-to-bedrock -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n soil-class -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -206,7 +206,7 @@ subset_geotiff () {
 # Data Processing
 # ===============
 # display info
-echo "$(logDate)$(basename $0): processing Wouter's Wonderful soil_class GeoTIFF(s)..."
+echo "$(logDate)$(basename $0): processing Wouter's wonderful soil_class GeoTIFF(s)..."
 
 # make the output directory
 echo "$(logDate)$(basename $0): creating output directory under $outputDir"

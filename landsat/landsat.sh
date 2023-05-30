@@ -1,8 +1,9 @@
 #!/bin/bash
-# GIS Data Processing Workflow
-# Copyright (C) 2022, University of Saskatchewan
+# Geospatial Data Processing Workflow
+# Copyright (C) 2022-2023, University of Saskatchewan
+# Copyright (C) 2023, University of Calgary
 #
-# This file is part of GIS Data Processing Workflow
+# This file is part of Geospatial Data Processing Workflow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,18 +34,19 @@
 # * function names are all in lower_case with words seperated by underscore for legibility;
 # * shell style is based on Google Open Source Projects'
 #   Style Guide: https://google.github.io/styleguide/shellguide.html
+# * 7z is needed as a dependency program
 
 
 # ===============
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]] [-u BOOL] [-q q1[,q2[...]]]] [-p STR] "
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n landsat -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n landsat -o i:o:v:r:s:e:l:n:f:t:a:u:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -66,13 +68,14 @@ do
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -v | --variable)      variables="$2"       ; shift 2 ;; # required
     -r | --crs)		  crs="$2"	       ; shift 2 ;; # required 
-    -s | --start-date)    startDate="$2"       ; shift 2 ;; # redundant - added for compatibility
-    -e | --end-date)      endDate="$2"         ; shift 2 ;; # redundant - added for compatibility
+    -s | --start-date)    startDate="$2"       ; shift 2 ;; # optional 
+    -e | --end-date)      endDate="$2"         ; shift 2 ;; # optional
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -u | --include-na)	  includeNA="$2"       ; shift 2 ;; # required
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required
@@ -87,15 +90,10 @@ do
   esac
 done
 
-# check if $ensemble is provided
-if [[ -n "$startDate" ]] || [[ -n "$endDate" ]]; then
-  echo "$(basename $0): ERROR! redundant argument (time extents) provided";
-  exit 1;
-fi
 
 # check the prefix if not set
 if [[ -z $prefix ]]; then
-  prefix="landsat"
+  prefix="landsat_"
 fi
 
 # parse comma-delimited variables
@@ -118,11 +116,28 @@ renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
 # ==========================
 # Necessary Global Variables
 # ==========================
-# the structure of the original file names are one of the following:
-#     * %{var}_M_sl%{soil_layer_depth_number}_250m_ll.tif
-#     * %{var}_250m_ll.tif
-# but the user is expected to include complete variable (file) name in the 
-# `--variable` input argument comma-separated list.
+# the structure of the landcover file names is as following:
+#     * land_cover_%YYYYv2_30m_tif.zip,
+# and the structure of the landcover change file name is as following:
+#     * land_change_2010v2_2015v2_30m_tif.zip
+#
+# for the first type of nomenclature, the --start-date and --end-date
+# arguments are used to access either 2010 or the 2015 dataset; it is
+# expected that the --variable argument to be equal to the following:
+# 'land_cover'
+#
+# for the second type of nomenclature, the --variable argument will
+# be equal to 'land_cover_change'
+
+# valid years when landsat landcover data are available
+validYears=(2010 2015) # update as new data becomes available
+
+# constant prefix and suffix for landcover's nomeclature
+landcoverPrefix="land_cover_"
+landcoverSuffix="v2_30m_tif.zip"
+
+# constant prefix and suffix for landcoverchange's nomenclature
+landcoverchangeFile="land_change_2010v2_2015v2_30m_tif.zip"
 
 
 # ===================
@@ -201,6 +216,55 @@ subset_geotiff () {
 }
 
 
+#######################################
+# Extract ESRI Shapefile extents 
+#
+# Globals:
+#   lonLims: longitude limits in
+#	     lat/lon system
+#   latLims: latitude limits in
+#	     lat/lon system
+#
+# Arguments:
+#   shapefilePath: Unix-style path to
+#                  an ESRI Shapefile
+#
+# Outputs:
+#   one mosaiced (merged) GeoTIFF under
+#   the $destDir
+#######################################
+extract_shapefile_extents () {
+  # local variables
+  local shapefileExtents # ogrinfo output containing ESIR Shapefile extents
+  local sourceProj4 # projection in proj4 format
+  local leftBottomLims # left bottom coordinates (min lon, min lat)
+  local rightTopLims # top right coordinates (max lon, max lat)
+
+  # reading arguments
+  local shapefilePath=$1
+
+  # extract the shapefile extent
+  IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefilePath" | sed 's/[),(]//g' | grep Extent)"
+
+  # transform the extents in case they are not in EPSG:4326
+  IFS=':' read -ra sourceProj4 <<< "$(gdalsrsinfo $shapefilePath | grep -e "PROJ.4")" # source Proj4 value
+  if [[ -n $sourceProj4 ]]; then
+    :
+  else
+    echo "$(logDate)$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI Shapefile"
+    sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
+  fi
+
+  # transform limits and assigning to relevant variables
+  IFS=' ' read -ra leftBottomLims <<< $(echo "${shapefileExtents[@]:1:2}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
+  IFS=' ' read -ra rightTopLims <<< $(echo "${shapefileExtents[@]:4:5}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
+
+  # define $latLims and $lonLims from $shapefileExtents
+  lonLims="${leftBottomLims[0]},${rightTopLims[0]}"
+  latLims="${leftBottomLims[1]},${rightTopLims[1]}"
+}
+
+
 # ===============
 # Data Processing
 # ===============
@@ -212,38 +276,83 @@ echo "$(logDate)$(basename $0): creating output directory under $outputDir"
 mkdir -p "$cache" # making the cache directory
 mkdir -p "$outputDir" # making the output directory
 
-# extracting the zip file
+# list .zip file names to be 
+## creating an empty global array to keep the file names
+files=()
+
+## checking the variable name and populate above array
 for var in "${variables[@]}"; do
-  unzip "${geotiffDir}/${var}" -d "$cache"
+
+  # check $var name
+  case "${var,,}" in
+
+    # land-cover variable(s)
+    "land-cover" | "land_cover" | "landcover" | "land cover")
+      ### check if the $startDate and $endDate variables are set
+      if [[ -z ${startDate} ]] || [[ -z ${endDate} ]]; then
+        echo "$(logDate)$(basename $0): ERROR! Both"' `--start-date` and `--end-date` must be provided'
+	exit 1;
+      fi
+      # extract the entered years and populate $files array
+      for y in ${validYears[@]}; do
+        if [[ "$y" -ge "${startDate}" ]] && [[ "$y" -le "${endDate}" ]]; then
+	  files+=("${landcoverPrefix}${y}${landcoverSuffix}")
+	else
+	  echo "$(logDate)$(basename $0): ERROR! Years out of range"
+	  exit 1;
+	fi
+      done
+      ;;
+
+    # land-cover-change variable
+    "landcoverchange" | "land-cover-change" | "land_cover_change" | "land_cover-change" | "land-cover_change" | "land cover change" )
+      ### check if the $startDate and $endDate variables are provided
+      if [[ -n ${startDate} ]] || [[ -n ${endDate} ]]; then
+        echo "$(logDate)$(basename $0): WARNING! For land-cover-change, only the difference for the 2010-2015 period is available"
+	echo "$(logDate)$(basename $0)"': WARNING! The `--start-date` and `--end-date` arguments are ignored for '"${var}"
+      fi
+      # populate $files array
+      files+=("$landcoverchangeFile")
+      ;;
+
+    # anything else
+    *)
+      echo "$(basename $0): WARNING! Invalid variable name"
+      ;;
+  esac
+done
+
+# check the length of $files array
+if [[ ${#files[@]} == 0 ]]; then
+  echo "$(basename $0): ERROR! No valid variable name(s) provided"
+  exit 1;
+fi
+
+# extracting the .zip files
+echo "$(logDate)$(basename $0): Extracting Landsat .zip files..."
+for file in "${files[@]}"; do
+  # IMPORTANT: 7z is needed as a dependency
+  7z e -y -bsp0 -bso0 "${geotiffDir}/${file}" -o${cache} *.tif -r
+done
+
+# list *.tif (not .tiff as per files' names)
+tiffs=()
+for tif in $cache/*.tif; do
+  tiffs+=($(basename "${tif}"))
 done
 
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
-  # extract the shapefile extent
-  IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefile" | sed 's/[),(]//g' | grep Extent)"
-  # transform the extents in case they are not in EPSG:4326
-  IFS=':' read -ra sourceProj4 <<< "$(gdalsrsinfo $shapefile | grep -e "PROJ.4")" # source Proj4 value
-  if [[ -n $sourceProj4 ]]; then
-    :
-  else
-    echo "$(logDate)$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI shapefile"
-    sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
-  fi
-  
-  # transform limits and assing to variables
-  IFS=' ' read -ra leftBottomLims <<< $(echo "${shapefileExtents[@]:1:2}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
-  IFS=' ' read -ra rightTopLims <<< $(echo "${shapefileExtents[@]:4:5}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
-  # define $latLims and $lonLims from $shapefileExtents
-  lonLims="${leftBottomLims[0]},${rightTopLims[0]}"
-  latLims="${leftBottomLims[1]},${rightTopLims[1]}"
+  # create latLims and lonLims variables specifying the limits of the ESRI Shapefile
+  extract_shapefile_extents "${shapefile}"
 fi
 
 # subset and produce stats if needed
-if [[ "$printGeotiff" == "true" ]]; then
+if [[ "${printGeotiff,,}" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
-  for var in "${variables[@]}"; do
+  for tif in "${tiffs[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}/${var}.tif" "${outputDir}/${prefix}${var}.tif"
+    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}"
   done
 fi
 
@@ -263,7 +372,8 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   export R_LIBS_USER="$tempInstallPath"
   
   # extract given stats for each variable
-  for var in "${variables[@]}"; do
+  for tif in "${tiffs[@]}"; do
+    IFS='.' read -ra fileName <<< "$tif"
     ## build renv and create stats
     Rscript "$(dirname $0)/../assets/stats.R" \
     	    "$tempInstallPath" \
@@ -272,11 +382,13 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \
 	    "${virtualEnvPath}/renv.lock" \
-	    "${cache}/${var}/${var}.tif" \
+	    "${cache}/${fileName[0]}.tif" \
 	    "$shapefile" \
-	    "$outputDir/${prefix}stats_${var}.csv" \
+	    "$outputDir/${prefix}stats_${fileName[0]}.csv" \
 	    "$stats" \
-	    "$quantiles" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;
+	    "$includeNA" \
+	    "$quantiles" >> "${outputDir}/${prefix}stats_${fileName[0]}.log" 2>&1; 
+    wait;
   done
 fi
 

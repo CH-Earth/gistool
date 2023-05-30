@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Geospatial Dataset Processing Workflow
-# Copyright (C) 2022, University of Saskatchewan
+# Copyright (C) 2022-2023, University of Saskatchewan
+# Copyright (C) 2023, University of Calgary
 #
 # This file is part of the Geospatial Dataset Processing Workflow
 #
@@ -31,15 +32,29 @@ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
      "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
 
 
-# implement subsetting and zonal statistics
+# Example 1: implement subsetting and zonal statistics on 2010 and 2015 landcover datasets
 ./extract-gis.sh --dataset="landsat" \
   --dataset-dir="/project/rpp-kshook/Model_Output/Landsat/" \
-  --variable="NA_NALCMS_2010_v2_land_cover_30m" \
+  --variable="land-cover" \
   --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
   --print-geotiff=true \
+  --output-dir="$HOME/scratch/landsat-test/" \
+  --prefix="landsat_test_" \
+  --start-date=2010 \
+  --end-date=2015 \
+  --stat="majority,minority,frac" \
+  --email=your-email@company.ca \
+  -j;
+
+# Example 2: implement zonal statistics for the 2010-2015 differences 
+#	     GeoTIFFs (see relevant landsat directory of this repository)
+./extract-gis.sh --dataset="landsat" \
+  --dataset-dir="/project/rpp-kshook/Model_Output/Landsat/" \
+  --variable="land-cover-change" \
+  --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --print-geotiff=false \
   --output-dir="$HOME/scratch/landsat-test/" \
   --prefix="landsat_test_" \
   --stat="majority,minority,frac" \
   --email=your-email@company.ca \
   -j;
-

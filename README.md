@@ -8,7 +8,8 @@ Usage:
 Script options:
   -d, --dataset				Geospatial dataset of interest, currently
                                         available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1'
+                                        'MERIT-Hydro';'SoilGridsV1';'Landsat';
+					'gsde';'depth-to-bedrock';
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -30,7 +31,9 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; optional
+					'coords'; 'count'; optional
+  -u, --include-na			Include NA values in generated statistics;
+  					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
   					is included in the '--stat' argument. The values
 					must be comma delimited float numbers between
@@ -38,7 +41,7 @@ Script options:
   -p, --prefix=STR			Prefix  prepended to the output files
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
-  					finishes; optional
+  					fails; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
 ```
@@ -50,12 +53,12 @@ Script options:
 |**1**|MODIS			     		   |2000 - 2021           |	|10.5067/MODIS/MCD12Q1.006	|[link](modis)	      |
 |**2**|MERIT Hydro		     		   |Not Applicable (N/A)  |4326	|10.1029/2019WR024873		|[link](merit_hydro)  |
 |**3**|Soil Grids (v1)				   |Not Applicable (N/A)  |4326	|10.1371/journal.pone.0169748	|[link](soil_grids)   |
-|**4**|Landsat NALCMS (2010, 30m)		   |Not Applicable (N/A)  |4326 |10.3390/rs9111098		|[link](landsat)      |
+|**4**|Landsat NALCMS				   |2010 and 2015	  |4326 |10.3390/rs9111098		|[link](landsat)      |
 |**5**|Global Depth to Bedrock			   |Not Applicable (N/A)  |     |10.1002/2016MS000686		|[link](depth_to_bedrock) |
 
 
 # General Example 
-As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Compute Canada (CC) and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
+As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Digital Alliance of Canada and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
 
 ```console
 foo@bar:~$ git clone https://github.com/kasra-keshavarz/gistool # clone the repository
@@ -88,7 +91,8 @@ Please open a new ticket on the **Issues** tab of the current repository in case
 
 # License
 Geospatial Dataset Processing Workflow<br>
-Copyright (C) 2022, University of Saskatchewan<br>
+Copyright (C) 2022-2023, University of Saskatchewan<br>
+Copyright (C) 2023, University of Calgary<br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

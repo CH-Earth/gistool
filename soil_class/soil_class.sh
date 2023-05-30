@@ -45,7 +45,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n soil-class -o i:o:v:r:s:e:l:n:f:t:a:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n soil-class -o i:o:v:r:s:e:l:n:f:t:a:u:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -74,6 +74,7 @@ do
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -u | --include-na)    includeNA="$2"       ; shift 2 ;; # required
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required

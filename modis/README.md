@@ -76,3 +76,30 @@ This dataset has 1 main variable that is described in the following table:
 |-------|---------------------------------------|---------------------------------------|---------------|
 |1	|`MCD12Q1.006`				|Global land cover classes		|		|
 
+# Other relevant information
+## Land Cover Types
+Below the land cover types for each values of the `.tif` files is detailed based on [1].
+
+|Class Value (used in `gistool`)	|Name					|Land Cover Description						|
+|---------------------------------------|---------------------------------------|---------------------------------------------------------------|
+|1					|Evergreen Needleleaf Forests		|Dominated by evergreen conifer trees (canopy>2m). Tree cover>60%.|
+|2					|Evergreen Broadleaf Forests		|Dominated by evergreen broadleaf and palmate trees (canopy >2m). Tree cover >60%.|
+|3					|Deciduous Needleleaf Forests		|Dominated by deciduous needleleaf (larch) trees (canopy >2m). Tree cover >60%.|
+|4					|Deciduous Broadleaf Forests		|Dominated by deciduous broadleaf trees (canopy >2m). Tree cover >60%.|
+|5					|Mixed Forests				|Dominated by neither deciduous nor evergreen (40-60% of each) tree type (canopy >2m). Tree cover >60%.|
+|6					|Closed Shrublands			|Dominated by woody perennials (1-2m height) >60% cover.	|
+|7					|Open Shrublands			|Dominated by woody perennials (1-2m height) 10-60% cover.	|
+|8					|Woody Savannas 			|Tree cover 30-60% (canopy >2m).				|
+|9					|Savannas				|Tree cover 10-30% (canopy >2m).				|
+|10					|Grasslands				|Dominated by herbaceous annuals (<2m).				|
+|11					|Permanent Wetlands			|Permanently inundated lands with 30-60% water cover and >10% vegetated cover.|
+|12					|Croplands				|At least 60% of area is cultivated cropland.			|
+|13					|Urban and Built-up Lands		|At least 30% impervious surface area including building materials, asphalt, and vehicles.|
+|14					|Cropland/Natural Vegetation Mosaics	|Mosaics of small-scale cultivation 40-60% with natural tree, shrub, or herbaceous vegetation.|
+|15					|Permanent Snow and Ice			|At least 60% of area is covered by snow and ice for at least 10 months of the year.|
+|16					|Barren					|At least 60% of area is non-vegetated barren (sand, rock, soil) areas with less than 10% veg- etation.|
+|17					|Water Bodies				|At least 60% of area is covered by permanent wa- ter bodies.	|
+|255					|Unclassified				|Has not received a map label because of missing inputs.	|
+
+Also, the details of the above table has been included in the following files: [modis_classes.csv](./modis_classes.csv).
+

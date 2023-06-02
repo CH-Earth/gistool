@@ -55,7 +55,8 @@ Script options:
 |**3**|Soil Grids (v1)				   |Not Applicable (N/A)  |4326	|10.1371/journal.pone.0169748	|[link](soil_grids)   |
 |**4**|Landsat NALCMS				   |2010 and 2015	  |4326 |10.3390/rs9111098		|[link](landsat)      |
 |**5**|Global Depth to Bedrock			   |Not Applicable (N/A)  |     |10.1002/2016MS000686		|[link](depth_to_bedrock) |
-
+|**6**|USDA Soil Class				   |Not Applicable (N/A)  |4326 |10.4211/hs.1361509511e44adfba814f6950c6e742|[link](soil_class)|
+|**7**|Global Soil Dataset for Earth System Modelling (GSDE)|Not Applicable (N/A)|4326 |10.1002/2013MS000293	|[link](GSDE)	      |
 
 # General Example 
 As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Digital Alliance of Canada and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:

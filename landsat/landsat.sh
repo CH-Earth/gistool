@@ -117,7 +117,8 @@ renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
 # Necessary Global Variables
 # ==========================
 # the structure of the landcover file names is as following:
-#     * land_cover_%YYYYv2_30m_tif.zip,
+#     * land_cover_%YYYYv2_30m_tif.zip, or
+#     * land_cover_%YYYY_30m_tif.zip,
 # and the structure of the landcover change file name is as following:
 #     * land_change_2010v2_2015v2_30m_tif.zip
 #
@@ -130,13 +131,12 @@ renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
 # be equal to 'land_cover_change'
 
 # valid years when landsat landcover data are available
-validYears=(2010 2015) # update as new data becomes available
+validYears=(2005 2010 2015 2020) # update as new data becomes available
 
-# constant prefix and suffix for landcover's nomeclature
+# constant prefix landcover's nomeclature
 landcoverPrefix="land_cover_"
-landcoverSuffix="v2_30m_tif.zip"
 
-# constant prefix and suffix for landcoverchange's nomenclature
+# constant name for landcoverchange's
 landcoverchangeFile="land_change_2010v2_2015v2_30m_tif.zip"
 
 
@@ -294,12 +294,9 @@ for var in "${variables[@]}"; do
 	exit 1;
       fi
       # extract the entered years and populate $files array
-      for y in ${validYears[@]}; do
+      for y in "${validYears[@]}"; do
         if [[ "$y" -ge "${startDate}" ]] && [[ "$y" -le "${endDate}" ]]; then
-	  files+=("${landcoverPrefix}${y}${landcoverSuffix}")
-	else
-	  echo "$(logDate)$(basename $0): ERROR! Years out of range"
-	  exit 1;
+	  files+=("${landcoverPrefix}${y}")
 	fi
       done
       ;;
@@ -328,11 +325,18 @@ if [[ ${#files[@]} == 0 ]]; then
   exit 1;
 fi
 
+# empty array for complete file names
+filesComplete=()
+# populating filesComplete array
+for f in "${files[@]}"; do
+ filesComplete+=($(ls -d ${geotiffDir}/${f}* | xargs -n 1 basename))
+done
+
 # extracting the .zip files
 echo "$(logDate)$(basename $0): Extracting Landsat .zip files..."
-for file in "${files[@]}"; do
+for zipFile in "${filesComplete[@]}"; do
   # IMPORTANT: 7z is needed as a dependency
-  7z e -y -bsp0 -bso0 "${geotiffDir}/${file}" -o${cache} *.tif -r
+  7z e -y -bsp0 -bso0 "${geotiffDir}/${zipFile}"* -o${cache} *.tif -r
 done
 
 # list *.tif (not .tiff as per files' names)
@@ -370,7 +374,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   tempInstallPath="$cache/r-packages"
   mkdir -p "$tempInstallPath"
   export R_LIBS_USER="$tempInstallPath"
-  
+ 
   # extract given stats for each variable
   for tif in "${tiffs[@]}"; do
     IFS='.' read -ra fileName <<< "$tif"

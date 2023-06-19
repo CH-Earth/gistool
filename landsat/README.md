@@ -12,23 +12,29 @@ And the structure of the files is as following:
 
 ```console
 /project/rpp-kshook/Model_Output/Landsat/
-├── land_change_2010v2_2015v2_30m_tif.zip 
+├── land_change_2010v2_2015v2_30m_tif.zip
+├── land_cover_2005v3_250m_tif.zip
+├── land_cover_2010v2_250m_tif.zip
 ├── land_cover_2010v2_30m_tif.zip
 ├── land_cover_2015v2_30m_tif.zip
+├── land_cover_2020_30m_tif.zip
 └── dl-landcover.sh
 ```
 
 ## Spatial and Temporal Extents
 
-The spatial extent of this dataset (so far only `NALCMS` that is a land cover dataset) covers longitudes from approximately `-180` to `-50` degress and latitudes from approximately `+14` to `+84` degress. This dataset is available for 2010 and 2015. Furthermore, one static dataset variable is also included demonstrating the gains and losses of various land covers between 2010 and 2015. Please see the list of variables for more information.
+The spatial extent of this dataset (so far only `NALCMS` that is a land cover dataset) covers longitudes from approximately `-180` to `-50` degress and latitudes from approximately `+14` to `+84` degress. This dataset is available for 2005 and 2020. Furthermore, one static dataset variable is also included demonstrating the gains and losses of various land covers between 2010 and 2015. Please see the list of variables for more information.
+
+| :point_up:    | The 250m resolution datasets for 2005 and 2010 are not *Landsat* products, but *MODIS*. However, as a temporary measure, these two datasets are included in the `landsat` workflow in `gistool`.|
+|---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 ## Dataset Variables
 This variables of this dataset are detailed in the table below:
 
-|#	|Variable Name (used in `gistool`)	|Description					|Comments	|
-|-------|---------------------------------------|-----------------------------------------------|---------------|
-|1      |land-cover				|Land cover classes for 2010 and 2015		|[2010 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/) and [2015 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2015-landsat-and-rapideye/)|
-|2	|land-cover-change			|Land cover change (between 2010 and 2015)	|[2010-2015 difference info](http://www.cec.org/north-american-environmental-atlas/land-cover-change-30m-2010-2015-landsat/)|
+|#	|Variable Name (used in `gistool`)	|Description					 |Comments	|
+|-------|---------------------------------------|------------------------------------------------|---------------|
+|1      |land-cover				|Land cover classes for 2005, 2010, 2015 and 2020|[2005 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2005-modis-250m/), [2010-30m dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-landsat-30m/), [2010-250m dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/), [2015 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2015-landsat-and-rapideye/), [2020 dataset info](http://www.cec.org/north-american-environmental-atlas/land-cover-30m-2020/)|
+|2	|land-cover-change			|Land cover change (between 2010 and 2015)	 |[2010-2015 difference info](http://www.cec.org/north-american-environmental-atlas/land-cover-change-30m-2010-2015-landsat/)|
 
 
 # Other relevant information

@@ -219,7 +219,6 @@ subset_geotiff () {
   latMin="${sortedLats[0]}"
   latMax="${sortedLats[1]}"
   ## longitude
-  sortedLons=($(sort_comma_delimited "$lonLims"))
   lonMin="${sortedLons[0]}"
   lonMax="${sortedLons[1]}"
 

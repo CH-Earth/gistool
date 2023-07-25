@@ -179,6 +179,13 @@ logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
 #   sourceVrt: source vrt file
 #   destPath: destionation path (inclu-
 #	      ding file name)
+#   localLatLims: latitude limits given
+#		  since global $latLims
+#		  are in different pro-
+#		  jection
+#   localLonLims: same as $localLatLims
+#		  but for longitude
+#		  values
 #
 # Outputs:
 #   one mosaiced (merged) GeoTIFF under
@@ -195,10 +202,20 @@ subset_geotiff () {
   # reading arguments
   local sourceVrt="$1"
   local destPath="$2"
+  local localLatLims="$3"
+  local localLonLims="$4"
+
+  # choosing global or locally provided lat/lon limits
+  if [[ -n $localLatLims && -n $localLonLims]]; then
+    sortedLats=($(sorted_comma_delimited "$localLatLims"))
+    sortedLons=($(sorted_comma_delimited "$localLonLims"))
+  else
+    sortedLats=($(sort_comma_delimited "$latLims"))
+    sortedLons=($(sort_comma_delimited "$lonLims"))
+  fi
 
   # extracting minimum and maximum of latitude and longitude respectively
   ## latitude
-  sortedLats=($(sort_comma_delimited "$latLims"))
   latMin="${sortedLats[0]}"
   latMax="${sortedLats[1]}"
   ## longitude
@@ -262,6 +279,66 @@ extract_shapefile_extents () {
   # define $latLims and $lonLims from $shapefileExtents
   lonLims="${leftBottomLims[0]},${rightTopLims[0]}"
   latLims="${leftBottomLims[1]},${rightTopLims[1]}"
+}
+
+#######################################
+# Transform projection based on source
+#     Proj4 string
+#
+# Globals:
+#   None
+#
+# Arguments:
+#   sourceProj4: string describing
+#                source projection
+#   coords: comma-separated coordinate
+#	    values
+#   coordsDelim: delimited in the 
+#    		 $coords variable
+#   transformDelim: delimtied in the
+# 		    transformed values
+#   destEPSG: EPSG value of the
+#	      destination projection
+#	      (default 'EPSG:4326')
+#
+# Outputs:
+#   comma-delimited $coords in the
+#   $destEPSG format
+#######################################
+transform_coords () {
+  # local variables
+  local sourceProj4="$1"
+  local coords="$2"
+  local coordsDelim="$3"
+  local transformDelim="$4"
+  local destEPSG="$5"
+  # local variables assigned in the function
+  local coordsBlankDel
+  local coordsTrans
+
+  # if $destEPSG not provided, use EPSG:4326 by default
+  if [[ -z $destEPSG ]]; then
+    destEPSG='EPSG:4326'
+  fi
+
+  # if $coordsDelim not provided, use comma ',' by default
+  if [[ -z $coordsDelim ]]; then
+    coordsDelim=','
+  fi
+
+  # substituting comma with a blank space
+  coordsBlankDel=$(echo "$coords" | tr "${coordsDelim}" ' ')
+
+  # transforming coords
+  coordsTrans=$(echo "$coordsBlankDel" | gdaltransform -s_srs "${sourceProj4}" -t_srs "${destEPSG}" -output_xy)
+
+  # subtitute blank space with $transformDelim value
+  if [[ -n $transformDelim ]]; then
+    coordsTrans=$(echo "$coordsTrans" | tr ' ' $transformDelim)
+  fi
+  
+  # echo-ing $coordsTrans variable
+  echo "${coordsTrans}"
 }
 
 
@@ -351,12 +428,18 @@ if [[ -n $shapefile ]]; then
   extract_shapefile_extents "${shapefile}"
 fi
 
+# assumption in `gistool` is that the $latLims and $lonLims are given in EPSG:4326
+tempTif="${cache}/${tiffs[0]}" # temporary tiff file only to extract source's Proj4 value
+IFS=':' read -ra sourceProj4 <<< "$(gdalsrsinfo "${tempTif}" | grep -e "PROJ.4")" # source Proj4 value
+latLimsTrans=$(transform_coords "$latLims" "EPSG:4326" "," "," "${sourceProj4[1]}")
+lonLimsTrans=$(transform_coords "$lonLims" "EPSG:4326" "," "," "${sourceProj4[1]}") 
+
 # subset and produce stats if needed
 if [[ "${printGeotiff,,}" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
   for tif in "${tiffs[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}"
+    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}" "$latLimsTrans" "$lonLimsTrans"
   done
 fi
 

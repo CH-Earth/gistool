@@ -165,7 +165,6 @@ sort_comma_delimited () { IFS=',' read -ra arr <<< "$*"; echo ${arr[*]} | tr " "
 # log date format
 logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
 
-
 #######################################
 # subset GeoTIFFs
 #
@@ -215,7 +214,6 @@ subset_geotiff () {
 		 > /dev/null;
 }
 
-
 #######################################
 # Extract ESRI Shapefile extents 
 #
@@ -226,8 +224,10 @@ subset_geotiff () {
 #	     lat/lon system
 #
 # Arguments:
-#   shapefilePath: Unix-style path to
-#                  an ESRI Shapefile
+#   shapefilePath: path to the ESRI
+#		   Shapefile
+#   destProj4: destination projection,
+#	       (optional)
 #
 # Outputs:
 #   one mosaiced (merged) GeoTIFF under
@@ -242,26 +242,102 @@ extract_shapefile_extents () {
 
   # reading arguments
   local shapefilePath=$1
+  local destProj4=$2
+
+  # extract PROJ.4 string for $shapefilePath
+  sourceProj4=$(ogrinfo -al -so $shapefilePath | grep -e "PROJ.4" 2>/dev/null)
+
+  # if $sourceProj4 is missing, assign EPSG:4326 as default value and warn
+  if [[ -z $sourceProj4 ]]; then
+    sourceProj4="EPSG:4326"
+    echo "$(logDate)$(basename $0): WARNING! Assuming EPSG:4326 for the" \
+    		"input ESRI Shapefile to extract the extents"
+  fi
+
+  # if $destProj4 provided, reproject and extract extent in the new
+  # projection
+  if [[ -n $destProj4 && "$destProj4" != "$sourceProj4" ]]; then
+    # temporary shapefile's path
+    tempShapefile="${cache}/temp_reprojected.shp"
+
+    # reproject ESRI shapefile to $destProj4
+    ogr2ogr -f "ESRI Shapefile" ${tempShapefile} ${shapefilePath} -s_srs \
+      "$sourceProj4" -t_srs "$destProj4"
+
+    # assign the path of the projected file as the $shapefilePath
+    shapefilePath="${tempShapefile}"
+  fi
 
   # extract the shapefile extent
   IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefilePath" | sed 's/[),(]//g' | grep Extent)"
-
-  # transform the extents in case they are not in EPSG:4326
-  IFS=':' read -ra sourceProj4 <<< "$(gdalsrsinfo $shapefilePath | grep -e "PROJ.4")" # source Proj4 value
-  if [[ -n $sourceProj4 ]]; then
-    :
-  else
-    echo "$(logDate)$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI Shapefile"
-    sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
-  fi
-
+  
   # transform limits and assigning to relevant variables
-  IFS=' ' read -ra leftBottomLims <<< $(echo "${shapefileExtents[@]:1:2}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
-  IFS=' ' read -ra rightTopLims <<< $(echo "${shapefileExtents[@]:4:5}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
+  IFS=' ' read -ra lowerLeftLims <<< $(echo "${shapefileExtents[@]:1:2}")
+  IFS=' ' read -ra upperRightLims <<< $(echo "${shapefileExtents[@]:4:5}")
 
   # define $latLims and $lonLims from $shapefileExtents
-  lonLims="${leftBottomLims[0]},${rightTopLims[0]}"
-  latLims="${leftBottomLims[1]},${rightTopLims[1]}"
+  lonLims="${lowerLeftLims[0]},${upperRightLims[0]}"
+  latLims="${lowerLeftLims[1]},${upperRightLims[1]}"
+}
+
+#######################################
+# Transform projection based on source
+#     Proj4 string
+#
+# Globals:
+#   None
+#
+# Arguments:
+#   sourceProj4: string describing
+#                source projection
+#   coords: comma-separated coordinate
+#	    values
+#   coordsDelim: delimited in the 
+#    		 $coords variable
+#   transformDelim: delimtied in the
+# 		    transformed values
+#   destEPSG: EPSG value of the
+#	      destination projection
+#	      (default 'EPSG:4326')
+#
+# Outputs:
+#   comma-delimited $coords in the
+#   $destEPSG format
+#######################################
+transform_coords () {
+  # local variables
+  local sourceProj4="$1"
+  local coords="$2"
+  local coordsDelim="$3"
+  local transformDelim="$4"
+  local destEPSG="$5"
+  # local variables assigned in the function
+  local coordsBlankDel
+  local coordsTrans
+
+  # if $destEPSG not provided, use EPSG:4326 by default
+  if [[ -z $destEPSG ]]; then
+    destEPSG='EPSG:4326'
+  fi
+
+  # if $coordsDelim not provided, use comma ',' by default
+  if [[ -z $coordsDelim ]]; then
+    coordsDelim=','
+  fi
+
+  # substituting comma with a blank space
+  coordsBlankDel=$(echo "$coords" | tr "${coordsDelim}" ' ')
+
+  # transforming coords
+  coordsTrans=$(echo "$coordsBlankDel" | gdaltransform -s_srs "${sourceProj4}" -t_srs "${destEPSG}" -output_xy)
+
+  # subtitute blank space with $transformDelim value
+  if [[ -n $transformDelim ]]; then
+    coordsTrans=$(echo "$coordsTrans" | tr ' ' $transformDelim)
+  fi
+  
+  # echo-ing $coordsTrans variable
+  echo "${coordsTrans}"
 }
 
 
@@ -345,18 +421,24 @@ for tif in $cache/*.tif; do
   tiffs+=($(basename "${tif}"))
 done
 
+# extracting raster projection PROJ.4 string value
+tempTif="${cache}/${tiffs[0]}"
+rasterProj4="$(gdalsrsinfo "${tempTif}" | grep -e "PROJ.4" | cut -d ':' -f2)"
+
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
   # create latLims and lonLims variables specifying the limits of the ESRI Shapefile
-  extract_shapefile_extents "${shapefile}"
+  extract_shapefile_extents "${shapefile}" "${rasterProj4}"
 fi
 
 # subset and produce stats if needed
 if [[ "${printGeotiff,,}" == "true" ]]; then
+  # echo message 
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
+  
   for tif in "${tiffs[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}"
+    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}" "$latLims" "$lonLims"
   done
 fi
 

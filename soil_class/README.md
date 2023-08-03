@@ -5,13 +5,13 @@ In this file, the necessary technical details of the dataset is explained.
 The `soil_class` geospatial dataset files are located under the following directory accessible from Digital Research Alliance of Canada (DRA, formerly Compute Canada) Graham cluster:
 
 ```console
-/project/6008034/wknoben/CWARHM_data/domain_NorthAmerica/parameters/soilclass/2_soil_classes_domain/
+/project/rpp-kshook/Model_Output/soil_classes
 ```
 
 And the structure of the files is as following:
 
 ```console
-/project/6008034/wknoben/CWARHM_data/domain_NorthAmerica/parameters/soilclass/2_soil_classes_domain/
+/project/rpp-kshook/Model_Output/soil_classes
 └── soil_classes.tif 
 ```
 
@@ -23,7 +23,7 @@ This variables of this dataset are detailed in the table below:
 
 |#	|Variable Name (used in `gistool`)	|Description				|Comments	|
 |-------|---------------------------------------|---------------------------------------|---------------|
-|1      |soil-class			        |USDA soil class 			|[link](https://www.hydroshare.org/resource/1361509511e44adfba814f6950c6e742/)|
+|1      |soil_classes		        |USDA soil class 			|[link](https://www.hydroshare.org/resource/1361509511e44adfba814f6950c6e742/)|
 
 
 # Other relevant information

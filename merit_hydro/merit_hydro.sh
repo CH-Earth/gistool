@@ -77,6 +77,7 @@ do
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -u | --include-na)	  includeNA="$2"       ; shift 2 ;; # required
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required

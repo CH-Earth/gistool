@@ -262,7 +262,7 @@ extract_shapefile_extents () {
 
     # reproject ESRI shapefile to $destProj4
     ogr2ogr -f "ESRI Shapefile" ${tempShapefile} ${shapefilePath} -s_srs \
-      "$sourceProj4" -t_srs "$destProj4"
+      "$sourceProj4" -t_srs "$destProj4" 2>/${outputDir}/misc.log
 
     # assign the path of the projected file as the $shapefilePath
     shapefilePath="${tempShapefile}"
@@ -270,7 +270,7 @@ extract_shapefile_extents () {
 
   # extract the shapefile extent
   IFS=' ' read -ra shapefileExtents <<< "$(ogrinfo -so -al "$shapefilePath" | sed 's/[),(]//g' | grep Extent)"
-  
+ 
   # transform limits and assigning to relevant variables
   IFS=' ' read -ra lowerLeftLims <<< $(echo "${shapefileExtents[@]:1:2}")
   IFS=' ' read -ra upperRightLims <<< $(echo "${shapefileExtents[@]:4:5}")

@@ -75,6 +75,8 @@ Script options:
 					must be comma delimited float numbers between
 					0 and 1; optional [defaults to every 5th quantile]
   -p, --prefix=STR			Prefix  prepended to the output files
+  -b, --parsable			Parsable SLURM message mainly used
+  					for chained job submissions
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
   					fails; optional
@@ -114,7 +116,7 @@ shopt -s expand_aliases
 # ATTENTION: `getopt` is available by default on most GNU/Linux 
 #	     distributions, however, it may not work out of the
 #	     box on MacOS or BSD
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:uq:p:c:EVh --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,email:,version,help -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:uq:p:c:E:Vhb --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,email:,version,help,parsable -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -149,6 +151,7 @@ do
     -u | --include-na)	  includeNA=true       ; shift	 ;; # optional
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
+    -b | --parsable)	  parsable=true	       ; shift   ;; # optional
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
     -E | --email)	  email="$2"	       ; shift 2 ;; # optional
     -V | --version)	  version	       ; shift   ;; # optional 
@@ -214,6 +217,20 @@ fi
 if [[ -n $email ]] && [[ -z $jobSubmission ]]; then
   echo "$(basename $0): Email is not supported wihtout job submission;"
   echo "$(basename $0): Continuing without email notification..."
+fi
+
+# parsable without job submission not allowed
+if [[ -n $parsable ]] && [[ -z $jobSubmission ]]; then
+  echo "$(basename $0): ERROR! --parsable argument cannot be used" \
+  "without job submission"
+    exit 1;
+fi
+
+# if parsable argument is provided
+if [[ -n $parsable ]]; then
+  parsable="--parsable"
+else
+  parsable=""
 fi
 
 # either shapefile or spatial extents arguments are allowed
@@ -302,17 +319,20 @@ call_processing_func () {
 	#SBATCH --nodes=1
 	#SBATCH --account=rpp-kshook
 	#SBATCH --time=04:00:00
-	#SBATCH --mem=16GB
+	#SBATCH --mem=16000MB
 	#SBATCH --job-name=GIS_${scriptName}
 	#SBATCH --error=$logDir/GIS_%j_err.txt
 	#SBATCH --output=$logDir/GIS_%j.txt
 	#SBATCH --mail-user=$email
 	#SBATCH --mail-type=BEGIN,END,FAIL
+	#SBATCH ${parsable}
 
 	srun ${scriptRun} --cache="${cache}-\${SLURM_JOB_ID}" 
 	EOF
     # echo message
-    echo "$(basename $0): job submission details are printed under ${logDir}"
+    if [[ -z parsable ]]; then
+      echo "$(basename $0): job submission details are printed under ${logDir}"
+    fi
  
   else
     eval "$scriptRun"

@@ -39,11 +39,16 @@ Script options:
 					must be comma delimited float numbers between
 					0 and 1; optional [defaults to every 5th quantile]
   -p, --prefix=STR			Prefix  prepended to the output files
+  -b, --parsable			Parsable SLURM message mainly used
+  					for chained job submissions
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
   					fails; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
+
+For bug reports, questions, and discussions open an issue
+at https://github.com/kasra-keshavarz/gistool/issues
 ```
 
 

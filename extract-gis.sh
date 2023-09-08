@@ -298,7 +298,7 @@ call_processing_func () {
   local script="$1" # script local path
   local chunkTStep="$2" # chunking time-frame periods
 
-  local scriptName=$(echo $script | cut -d '/' -f 2) # script/geotiff name
+  local scriptName=$(basename $script | cut -d '.' -f 1) # script/geotiff name
 
   # prepare a script in string format
   # all processing script files must follow same input argument standard
@@ -310,7 +310,7 @@ call_processing_func () {
   # evaluate the script file using the arguments provided
   if [[ "${funcArgs[jobSubmission]}" == true ]]; then
     # Create a temporary directory for keeping job logs
-    logDir="$HOME/scratch/.gistool_logs/"
+    logDir="$HOME/.gistool_logs/"
     mkdir -p "$logDir" 
     # SLURM batch file
     sbatch <<- EOF

@@ -27,7 +27,7 @@ This variables of this dataset are detailed in the table below:
 
 
 # Other relevant information
-## Land Cover Types
+## Soil Types
 Below the land cover types for each values of the `.tif` files is detailed based on [1].
 
 |Class Value (used in `gistool`)	|Soil Type			|

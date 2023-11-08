@@ -210,7 +210,7 @@ subset_geotiff () {
   gdal_translate --config GDAL_CACHEMAX 500 \
   		 -co COMPRESS="DEFLATE" \
   		 -co BIGTIFF="YES" \
-		 -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
+		 -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
 		 > /dev/null;
 }
 
@@ -245,10 +245,10 @@ extract_shapefile_extents () {
   local destProj4=$2
 
   # extract PROJ.4 string for $shapefilePath
-  sourceProj4=$(ogrinfo -al -so $shapefilePath | grep -e "PROJ.4" 2>/dev/null)
+  sourceProj4=$(ogrinfo -al -so "$shapefilePath" | grep -e "PROJ.4" 2>/dev/null)
 
   # if $sourceProj4 is missing, assign EPSG:4326 as default value and warn
-  if [[ -z $sourceProj4 ]]; then
+  if [[ -z "$sourceProj4" ]]; then
     sourceProj4="EPSG:4326"
     echo "$(logDate)$(basename $0): WARNING! Assuming EPSG:4326 for the" \
     		"input ESRI Shapefile to extract the extents"
@@ -261,8 +261,8 @@ extract_shapefile_extents () {
     tempShapefile="${cache}/temp_reprojected.shp"
 
     # reproject ESRI shapefile to $destProj4
-    ogr2ogr -f "ESRI Shapefile" ${tempShapefile} ${shapefilePath} -s_srs \
-      "$sourceProj4" -t_srs "$destProj4" 2>/${outputDir}/misc.log
+    ogr2ogr -f "ESRI Shapefile" "${tempShapefile}" "${shapefilePath}" -s_srs \
+      "$sourceProj4" -t_srs "$destProj4" 2>"${outputDir}/misc.log"
 
     # assign the path of the projected file as the $shapefilePath
     shapefilePath="${tempShapefile}"
@@ -456,7 +456,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   tempInstallPath="$cache/r-packages"
   mkdir -p "$tempInstallPath"
   export R_LIBS_USER="$tempInstallPath"
- 
+
   # extract given stats for each variable
   for tif in "${tiffs[@]}"; do
     IFS='.' read -ra fileName <<< "$tif"

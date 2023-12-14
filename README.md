@@ -31,7 +31,7 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; 'count'; optional
+					'coords'; 'count'; 'sum'; optional
   -u, --include-na			Include NA values in generated statistics;
   					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'

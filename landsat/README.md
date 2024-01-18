@@ -5,7 +5,8 @@ In this file, the necessary technical details of the dataset is explained.
 The `LandSat` geospatial dataset files are located under the following directory accessible from Digital Alliance (formerly Compute Canada) Graham cluster:
 
 ```console
-/project/rpp-kshook/Model_Output/Landsat/
+/project/rpp-kshook/Model_Output/Landsat/ # rpp-kshook allocation
+/project/rrg-mclark/data/geospatial-data/Landsat # rrg-mclark allocation
 ```
 
 And the structure of the files is as following:

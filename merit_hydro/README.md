@@ -5,7 +5,8 @@ In this file, the necessary technical details of the dataset is explained.
 The `MERIT-Hydro` geospatial dataset files are located under the following directory accessible from Digital Alliance (formerly Compute Canada) Graham cluster:
 
 ```console
-/project/rpp-kshook/CompHydCore/merit_hydro/raw_data
+/project/rpp-kshook/CompHydCore/merit_hydro/raw_data # rpp-kshook allocation
+/project/rrg-mclark/data/geospatial-data/MERIT-Hydro # rrg-mclark allocation
 ```
 
 And the structure of the files is as following:

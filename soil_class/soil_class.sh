@@ -1,5 +1,6 @@
 #!/bin/bash
 # GIS Data Processing Workflow
+# Copyright (C) 2023-2024, University of Calgary
 # Copyright (C) 2022, University of Saskatchewan
 # Copyright (C) 2021, Wouter Knoben
 #

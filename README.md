@@ -6,10 +6,7 @@ Usage:
   extract-gis [options...]
 
 Script options:
-  -d, --dataset				Geospatial dataset of interest, currently
-                                        available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1';'Landsat';
-					'gsde';'depth-to-bedrock';
+  -d, --dataset				Geospatial dataset of interest
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -31,7 +28,7 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; 'count'; optional
+					'coords'; 'count'; 'sum'; optional
   -u, --include-na			Include NA values in generated statistics;
   					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'

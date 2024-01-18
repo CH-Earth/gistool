@@ -1,7 +1,7 @@
 #!/bin/bash
 # Geospatial Data Processing Workflow
-# Copyright (C) 2022-2023, University of Saskatchewan
-# Copyright (C) 2023, University of Calgary
+# Copyright (C) 2022, University of Saskatchewan
+# Copyright (C) 2023-2024, University of Calgary
 #
 # This file is part of Geospatial Data Processing Workflow
 #
@@ -42,10 +42,7 @@ Usage:
   extract-gis [options...]
 
 Script options:
-  -d, --dataset				Geospatial dataset of interest, currently
-                                        available options are: 'MODIS';
-                                        'MERIT-Hydro';'SoilGridsV1';'Landsat';
-					'gsde';'depth-to-bedrock';
+  -d, --dataset				Geospatial dataset of interest
   -i, --dataset-dir=DIR			The source path of the dataset file(s)
   -r, --crs=INT				The EPSG code of interest; optional
   					[defaults to 4326]
@@ -67,7 +64,7 @@ Script options:
 					'min';'max';'mean';'majority';'minority';
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
-					'coords'; 'count'; optional
+					'coords'; 'count'; 'sum'; optional
   -u, --include-na			Include NA values in generated statistics;
   					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
@@ -82,6 +79,14 @@ Script options:
   					fails; optional
   -V, --version				Show version
   -h, --help				Show this screen and exit
+
+currently available options are:
+    1) MERIT-Hydro (doi: 10.1029/2019WR024873)
+    2) SoilGridsV1 (doi: 10.1371/journal.pone.0169748)
+    3) Landsat (url: http://www.cec.org/north-american-land-change-monitoring-system/)
+    4) gsde (doi: 10.1002/2013MS000293)
+    5) depth-to-bedrock (doi: 10.1002/2016MS000686)
+    6) MODIS (doi: 10.5067/MODIS/MCD12C1.061 and 10.5067/MODIS/MCD12Q1.006)
 
 For bug reports, questions, and discussions open an issue
 at https://github.com/kasra-keshavarz/gistool/issues" >&1;

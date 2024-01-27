@@ -29,7 +29,7 @@ Script options:
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
 					'coords'; 'count'; 'sum'; optional
-  -u, --include-na			Include NA values in generated statistics;
+  -U, --include-na			Include NA values in generated statistics;
   					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
   					is included in the '--stat' argument. The values
@@ -41,6 +41,8 @@ Script options:
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
   					fails; optional
+  -u, --account				Digital Research Alliance of Canada's sponsor's
+  					account name; optional, defaults to 'rpp-kshook'
   -V, --version				Show version
   -h, --help				Show this screen and exit
 

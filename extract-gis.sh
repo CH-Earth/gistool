@@ -65,7 +65,7 @@ Script options:
 					'median';'quantile';'variety';'variance';
 					'stdev';'coefficient_of_variation';'frac';
 					'coords'; 'count'; 'sum'; optional
-  -u, --include-na			Include NA values in generated statistics;
+  -U, --include-na			Include NA values in generated statistics;
   					optional 
   -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
   					is included in the '--stat' argument. The values
@@ -77,6 +77,8 @@ Script options:
   -c, --cache=DIR			Path of the cache directory; optional
   -E, --email=STR			E-mail when job starts, ends, and 
   					fails; optional
+  -u, --account				Digital Research Alliance of Canada's sponsor's
+  					account name; optional, defaults to 'rpp-kshook'
   -V, --version				Show version
   -h, --help				Show this screen and exit
 
@@ -121,7 +123,7 @@ shopt -s expand_aliases
 # ATTENTION: `getopt` is available by default on most GNU/Linux 
 #	     distributions, however, it may not work out of the
 #	     box on MacOS or BSD
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:uq:p:c:E:Vhb --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,email:,version,help,parsable -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:Uq:p:c:L:E:u:Vhb --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,lib-path:,email:,account:,version,help,parsable -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -153,12 +155,14 @@ do
     -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # optional
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
-    -u | --include-na)	  includeNA=true       ; shift	 ;; # optional
+    -U | --include-na)	  includeNA=true       ; shift	 ;; # optional
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefixStr="$2"       ; shift 2 ;; # required
     -b | --parsable)	  parsable=true	       ; shift   ;; # optional
     -c | --cache)	  cache="$2"	       ; shift 2 ;; # optional
     -E | --email)	  email="$2"	       ; shift 2 ;; # optional
+    -u | --account)	  account="$2"         ; shift 2 ;; # optional
+    -L | --lib-path)	  libPath="$2"         ; shift 2 ;; # optional
     -V | --version)	  version	       ; shift   ;; # optional 
     -h | --help)          usage                ; shift   ;; # optional
 
@@ -271,6 +275,23 @@ if [[ "$stats" == *"quantile"* ]] && [[ -z $quantiles ]]; then
   quantiles="0.25,0.50,0.75"
 fi
 
+# if account is not provided, use `rpp-kshook` as default
+if [[ -z $account ]]; then
+  account="rpp-kshook"
+  if [[ -z $parsable ]]; then
+    echo "$(basename $0): WARNING! --account not provided, using \`rpp-kshook\` by default."
+  fi
+fi
+
+# `--lib-path` needs a default value if not provided
+if [[ -z $libPath ]]; then
+  libPath="/project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/"
+  if [[ -z $parsable ]]; then
+    echo "$(basename $0): WARNING! --lib-path not provided, using default path"
+    echo "                /project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/"
+  fi
+fi
+
 
 # ======================
 # Necessary Preparations
@@ -291,6 +312,7 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 		     [includeNA]="$includeNA" \
 		     [quantiles]="$quantiles" \
 		     [prefixStr]="$prefixStr" \
+		     [libPath]="$libPath" \
 		     [cache]="$cache" \
 		    );
 
@@ -309,20 +331,20 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --include-na="${funcArgs[includeNA]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --include-na="${funcArgs[includeNA]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}" --lib-path="${funcArgs[libPath]}"
 	EOF
 
   # evaluate the script file using the arguments provided
   if [[ "${funcArgs[jobSubmission]}" == true ]]; then
     # Create a temporary directory for keeping job logs
-    logDir="$HOME/.gistool_logs/"
+    logDir="$HOME/.gistool/"
     mkdir -p "$logDir" 
     # SLURM batch file
     sbatch <<- EOF
 	#!/bin/bash
 	#SBATCH --cpus-per-task=4
 	#SBATCH --nodes=1
-	#SBATCH --account=rpp-kshook
+	#SBATCH --account=$account
 	#SBATCH --time=04:00:00
 	#SBATCH --mem=16000MB
 	#SBATCH --job-name=GIS_${scriptName}

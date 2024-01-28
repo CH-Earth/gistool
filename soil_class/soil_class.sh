@@ -242,7 +242,6 @@ if [[ "$printGeotiff" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
   for var in "${variables[@]}"; do
     # subset based on lat and lon values
-    echo "tif is: "${geotiffDir}/${var}.tif""
     subset_geotiff "${geotiffDir}/${var}.tif" "${outputDir}/${prefix}${var}.tif"
   done
 fi

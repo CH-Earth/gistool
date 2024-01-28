@@ -89,6 +89,7 @@ currently available options are:
     4) gsde (doi: 10.1002/2013MS000293)
     5) depth-to-bedrock (doi: 10.1002/2016MS000686)
     6) MODIS (doi: 10.5067/MODIS/MCD12C1.061 and 10.5067/MODIS/MCD12Q1.006)
+    7) soilclasses (doi: 10.4211/hs.1361509511e44adfba814f6950c6e742, based on Soil Grids v1)
 
 For bug reports, questions, and discussions open an issue
 at https://github.com/kasra-keshavarz/gistool/issues" >&1;

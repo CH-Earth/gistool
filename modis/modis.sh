@@ -316,7 +316,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	      "$shapefile" \
 	      "$outputDir/${var}/${prefix}stats_${var}_${yr}.csv" \
 	      "$stats" \
-	      "$includeNA" \ 
+	      "$includeNA" \
 	      "$quantiles" >> "${outputDir}/${var}/${prefix}stats_${var}_${yr}.log" 2>&1;
     done
   done

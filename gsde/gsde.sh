@@ -46,7 +46,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n gsde -o i:o:v:r:s:e:l:n:f:t:a:u:q:p:c: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache: -- "$@")
+parsedArguments=$(getopt -a -n gsde -o i:o:v:r:s:e:l:n:f:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:lib-path: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -79,6 +79,7 @@ do
     -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)	  cache="$2"           ; shift 2 ;; # required
+    -L | --lib-path)      renvCache="$2"       ; shift 2 ;; # required
 
     # -- means the end of the arguments; drop this, and break out of the while loop
     --) shift; break ;;
@@ -112,10 +113,11 @@ IFS=',' read -ra variables <<< "${variables}"
 alias date='TZ=UTC date'
 # expand aliases for the one stated above
 shopt -s expand_aliases
-# hard-coded paths
-renvCache="/project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/" # general renv cache path
+
+# necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
 renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
+
 # some variables
 latVar="lat"
 lonVar="lon"

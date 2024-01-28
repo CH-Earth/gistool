@@ -79,10 +79,12 @@ Script options:
   					fails; optional
   -u, --account				Digital Research Alliance of Canada's sponsor's
   					account name; optional, defaults to 'rpp-kshook'
+  -L, --lib-path			Path to the shared libraries needed
   -V, --version				Show version
   -h, --help				Show this screen and exit
 
-currently available options are:
+currently available datasets are:
+
     1) MERIT-Hydro (doi: 10.1029/2019WR024873)
     2) SoilGridsV1 (doi: 10.1371/journal.pone.0169748)
     3) Landsat (url: http://www.cec.org/north-american-land-change-monitoring-system/)

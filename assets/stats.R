@@ -79,7 +79,7 @@ if (coord_var %in% s) {
 }
 
 # extract ID column name
-if (missing(fid)) {
+if (fid == 'default') {
   id_col <- names(p[1])[1]
 } else {
   id_col <- fid

@@ -55,6 +55,9 @@ Script options:
   -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
   -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional
   -f, --shape-file=PATH			Path to the ESRI '.shp' file; optional
+  -F, --fid=STR				Column name representing elements of the
+  					ESRI Shapefile to report statistics; optional
+					defaults to the first column
   -j, --submit-job			Submit the data extraction process as a job
 					on the SLURM system; optional
   -t, --print-geotiff=BOOL		Extract the subsetted GeoTIFF file; optional
@@ -101,7 +104,7 @@ at https://github.com/kasra-keshavarz/gistool/issues" >&1;
 }
 
 short_usage () {
-  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhEu] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH] [-p STR] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] " >&1;
+  echo "usage: $(basename $0) -d DATASET -io DIR -v var1[,var2,[...]] [-jVhEu] [-t BOOL] [-c DIR] [-se DATE] [-r INT] [-ln REAL,REAL] [-f PATH] [-F STR] [-p STR] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] " >&1;
 }
 
 version () {
@@ -127,7 +130,7 @@ shopt -s expand_aliases
 # ATTENTION: `getopt` is available by default on most GNU/Linux 
 #	     distributions, however, it may not work out of the
 #	     box on MacOS or BSD
-parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:jt:a:Uq:p:c:L:E:u:Vhb --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,lib-path:,email:,account:,version,help,parsable -- "$@")
+parsedArguments=$(getopt -a -n extract-geotiff -o d:i:r:v:o:s:e:l:n:f:F:jt:a:Uq:p:c:L:E:u:Vhb --long dataset:,dataset-dir:,crs:,variable:,output-dir:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,submit-job,print-geotiff:,stat:,include-na,quantile:,prefix:,cache:,lib-path:,email:,account:,version,help,parsable -- "$@")
 validArguments=$?
 # check if there is no valid options
 if [ "$validArguments" != "0" ]; then
@@ -156,6 +159,7 @@ do
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # optional
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # optional
     -f | --shape-file)	  shapefile="$2"       ; shift 2 ;; # optional
+    -F | --fid)           fid="$2"             ; shift 2 ;; # optional
     -j | --submit-job)    jobSubmission=true   ; shift   ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # optional
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
@@ -296,6 +300,14 @@ if [[ -z $libPath ]]; then
   fi
 fi
 
+# if `--fid` is not provided
+if [[ -z $fid ]]; then
+  if [[ -z $parsable ]] && [[ -n $stats  ]]; then
+    echo "$(basename $0): WARNING! --fid not provided, using the first"
+    echo "                column of `${shapefile}` to report statistics"
+  fi
+fi
+
 
 # ======================
 # Necessary Preparations
@@ -310,6 +322,7 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 		     [latLims]="$latLims" \
 		     [lonLims]="$lonLims" \
 		     [shapefile]="$shapefile" \
+		     [fid]="$fid" \
 		     [jobSubmission]="$jobSubmission" \
 		     [printGeotiff]="$printGeotiff" \
 		     [stats]="$stats" \
@@ -335,7 +348,7 @@ call_processing_func () {
   # all processing script files must follow same input argument standard
   local scriptRun
   read -rd '' scriptRun <<- EOF
-	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --include-na="${funcArgs[includeNA]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}" --lib-path="${funcArgs[libPath]}"
+	bash ${script} --dataset-dir="${funcArgs[geotiffDir]}" --crs="${funcArgs[crs]}" --variable="${funcArgs[variables]}" --output-dir="${funcArgs[outputDir]}" --start-date="${funcArgs[startDate]}" --end-date="${funcArgs[endDate]}" --lat-lims="${funcArgs[latLims]}" --lon-lims="${funcArgs[lonLims]}" --shape-file="${funcArgs[shapefile]}" --fid="${funcArgs[fid]}" --print-geotiff="${funcArgs[printGeotiff]}" --stat="${funcArgs[stats]}" --include-na="${funcArgs[includeNA]}" --quantile="${funcArgs[quantiles]}" --prefix="${funcArgs[prefixStr]}" --cache="${funcArgs[cache]}" --lib-path="${funcArgs[libPath]}"
 	EOF
 
   # evaluate the script file using the arguments provided

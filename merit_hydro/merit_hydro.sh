@@ -43,12 +43,12 @@
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-t BOOL] [-a stat1[,stat2,[...]] [-u BOOL] [-q q1[,q2[...]]]] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-F STR] [-t BOOL] [-a stat1[,stat2,[...]] [-u BOOL] [-q q1[,q2[...]]]] [-p STR]"
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
+parsedArguments=$(getopt -a -n merit_hydro -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -75,6 +75,7 @@ do
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
+    -F | --fid)           fid="$2"             ; shift 2 ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
     -u | --include-na)	  includeNA="$2"       ; shift 2 ;; # required
@@ -379,7 +380,8 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
 	    "$outputDir/${prefix}stats_${var}.csv" \
 	    "$stats" \
 	    "$includeNA" \
-	    "$quantiles" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;
+	    "$quantiles" \
+	    "$fid" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;
   done
 fi
 

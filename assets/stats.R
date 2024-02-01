@@ -33,6 +33,7 @@ output_path <- args[14];
 stats <- args[15];
 include_na <- args[16];
 quantiles <- args[17];
+fid <- args[18];
 
 # set the working directory path
 setwd(working_dir_path)
@@ -78,7 +79,11 @@ if (coord_var %in% s) {
 }
 
 # extract ID column name
-id_col <- names(p[1])[1]
+if (fid == 'default') {
+  id_col <- names(p[1])[1]
+} else {
+  id_col <- fid
+}
 
 # check `na_values`
 if (include_na == 'true') {

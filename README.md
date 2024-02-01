@@ -19,6 +19,9 @@ Script options:
   -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
   -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional
   -f, --shape-file=PATH			Path to the ESRI '.shp' file; optional
+  -F, --fid=STR				Column name representing elements of the
+  					ESRI Shapefile to report statistics; optional
+					defaults to the first column
   -j, --submit-job			Submit the data extraction process as a job
 					on the SLURM system; optional
   -t, --print-geotiff=BOOL		Extract the subsetted GeoTIFF file; optional

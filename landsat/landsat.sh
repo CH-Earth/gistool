@@ -411,7 +411,7 @@ for f in "${files[@]}"; do
 done
 
 # extracting the .zip files
-echo "$(logDate)$(basename $0): Extracting Landsat .zip files..."
+echo "$(logDate)$(basename $0): Extracting Landsat .zip files under ${cache}"
 for zipFile in "${filesComplete[@]}"; do
   # IMPORTANT: 7z is needed as a dependency
   7z e -y -bsp0 -bso0 "${geotiffDir}/${zipFile}"* -o${cache} *.tif -r

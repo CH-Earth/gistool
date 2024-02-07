@@ -46,6 +46,8 @@ Script options:
   					fails; optional
   -u, --account				Digital Research Alliance of Canada's sponsor's
   					account name; optional, defaults to 'rpp-kshook'
+  -L, --lib-path			Path to the shared libraries needed; optional,
+  					see the source code for the default path
   -V, --version				Show version
   -h, --help				Show this screen and exit
 

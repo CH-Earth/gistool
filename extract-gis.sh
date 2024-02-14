@@ -284,7 +284,7 @@ if [[ "$stats" == *"quantile"* ]] && [[ -z $quantiles ]]; then
 fi
 
 # if account is not provided, use `rpp-kshook` as default
-if [[ -z $account ]] && [[ -n $submitJob ]]; then
+if [[ -z $account ]]; then
   account="rpp-kshook"
   if [[ -z $parsable ]]; then
     echo "$(basename $0): WARNING! --account not provided, using \`rpp-kshook\` by default."
@@ -301,10 +301,12 @@ if [[ -z $libPath ]]; then
 fi
 
 # if `--fid` is not provided
-if [[ -z $fid ]] && [[ -z $parsable ]] && [[ -n $stats  ]]; then
+if [[ -z $fid ]] && [[ -n $stats  ]]; then
   fid='default'
-  echo "$(basename $0): WARNING! --fid not provided, using the first"
-  echo "                column of the input ESRI Shapefile to report statistics"
+  if [[ -z $parsable ]]; then
+    echo "$(basename $0): WARNING! --fid not provided, using the first"
+    echo "                column of the input ESRI Shapefile to report statistics"
+  fi
 fi
 
 

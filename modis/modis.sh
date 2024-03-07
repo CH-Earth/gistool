@@ -46,7 +46,7 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n modis -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:lib-path: -- "$@")
+parsedArguments=$(getopt -a -n modis -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -67,7 +67,7 @@ do
     -i | --dataset-dir)   geotiffDir="$2"      ; shift 2 ;; # required
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -v | --variable)      variables="$2"       ; shift 2 ;; # required
-    -r | --crs)		  crs="$2"	       ; shift 2 ;; # required 
+    -r | --crs)           crs="$2"             ; shift 2 ;; # required 
     -s | --start-date)    startDate="$2"       ; shift 2 ;; # required
     -e | --end-date)      endDate="$2"         ; shift 2 ;; # required
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
@@ -75,11 +75,11 @@ do
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -F | --fid)           fid="$2"             ; shift 2 ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
-    -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -a | --stat)          stats="$2"           ; shift 2 ;; # optional
     -u | --include-na)    includeNA="$2"       ; shift 2 ;; # required
-    -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
-    -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
-    -c | --cache)	  cache="$2"           ; shift 2 ;; # required
+    -q | --quantile)      quantiles="$2"       ; shift 2 ;; # optional
+    -p | --prefix)        prefix="$2"          ; shift 2 ;; # optional
+    -c | --cache)         cache="$2"           ; shift 2 ;; # required
     -L | --lib-path)      renvCache="$2"       ; shift 2 ;; # required
 
     # -- means the end of the arguments; drop this, and break out of the while loop
@@ -199,7 +199,7 @@ subset_geotiff () {
   gdal_translate --config GDAL_CACHEMAX 500 \
   		 -co COMPRESS="DEFLATE" \
   		 -co BIGTIFF="YES" \
-		 -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
+       -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
 		 > /dev/null;
 }
 

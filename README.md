@@ -92,6 +92,13 @@ foo@bar:~$ ./extract-gis.sh  --dataset="merit-hydro" \
 ```
 See the [example](./example) directory for real-world scripts for each geospatial dataset included in this repository.
 
+
+# Logs
+The datasets logs are generated under the `$HOME/.gistool` directory,
+only in cases where jobs are submitted to clusters' schedulers. If
+processing is not submitted as a job, then the logs are printed on screen.
+
+
 # `--lib-path` options
 Currently, on Graham HPC, the following options are available:
 ```console

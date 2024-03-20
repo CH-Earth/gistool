@@ -1,5 +1,7 @@
 # Description
-This repository contains scripts to process necessary geospatial datasets and implement efficient zonal statistics on given ESRI Shapefiles. The general usage of the script (i.e., `./extract-gis.sh`) is as follows:
+This repository contains scripts to process necessary geospatial datasets 
+and implement efficient zonal statistics on given ESRI Shapefiles. The 
+general usage of the script (i.e., `./extract-gis.sh`) is as follows:
 
 ```console
 Usage:
@@ -90,9 +92,20 @@ foo@bar:~$ ./extract-gis.sh  --dataset="merit-hydro" \
 ```
 See the [example](./example) directory for real-world scripts for each geospatial dataset included in this repository.
 
+# `--lib-path` options
+Currently, on Graham HPC, the following options are available:
+```console
+/project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/ # default, rpp-kshook allocation
+/project/rrg-mclark/lib # rrg-mclark allocation
+```
+
 
 # New Datasets
-If you are considering any new dataset to be added to the data repository, and subsequently the associated scripts added here, you can open a new ticket on the **Issues** tab of the current repository. Or, you can make a [Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) on this repository with your own script.
+If you are considering any new dataset to be added to the data repository, 
+and subsequently the associated scripts added here, you can open a new 
+ticket on the **Issues** tab of the current repository. Or, you can make 
+a [Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+on this repository with your own script.
 
 
 # Support
@@ -102,7 +115,7 @@ Please open a new ticket on the **Issues** tab of the current repository in case
 # License
 Geospatial Dataset Processing Workflow<br>
 Copyright (C) 2022-2023, University of Saskatchewan<br>
-Copyright (C) 2023, University of Calgary<br>
+Copyright (C) 2023-2024, University of Calgary<br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

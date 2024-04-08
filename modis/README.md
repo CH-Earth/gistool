@@ -5,7 +5,8 @@ In this file, the necessary technical details of the dataset is explained. It is
 The `MODIS` geospatial dataset files are located under the following directory accessible from Digital Alliance (formerly Compute Canada) Graham cluster:
 
 ```console
-/project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/
+/project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/ # rpp-kshook allocation
+/project/rrg-mclark/data/geospatial-data/MODIS # rrg-mclark allocation
 ```
 
 And the structure of the files is as following:

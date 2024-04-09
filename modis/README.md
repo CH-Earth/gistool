@@ -63,7 +63,7 @@ This dataset has 1 main variable that is described in the following table:
 |3  |`MOD16A2.061`                           |Global ET/PET/LE/PLE Land             |8-day time-series of evapotranspiration (ET) and its potential value (PET), Latent Heat flux (LE) and its potential value (PLE) [link](https://modis.gsfc.nasa.gov/data/dataprod/mod16.php)|
 |4  |`MOD16A2GF.061`                         |Global gap-filled ET/PET/LE/PLE Land  |8-day time-series of evapotranspiration (ET) and its potential value (PET), Latent Heat flux (LE) and its potential value (PLE) [link](https://modis.gsfc.nasa.gov/data/dataprod/mod16.php)|
 |5  |`MYD16A2.061`                           |Global ET/PET/LE/PLE Aqua             |8-day time-series of evapotranspiration (ET) and its potential value (PET), Latent Heat flux (LE) and its potential value (PLE) [link](https://modis.gsfc.nasa.gov/data/dataprod/mod16.php)|
-|6  |`MOD16A3GF.061`                         |Global gap-filled ET/PET/LE/PLE Aqua  |Annual time-series of evapotranspiration (ET) and its potential value (PET), Latent Heat flux (LE) and its potential value (PLE) [link](https://modis.gsfc.nasa.gov/data/dataprod/mod16.php)|
+|6  |`MOD16A3GF.061`                         |Global gap-filled ET/PET/LE/PLE Land  |Annual time-series of evapotranspiration (ET) and its potential value (PET), Latent Heat flux (LE) and its potential value (PLE) [link](https://modis.gsfc.nasa.gov/data/dataprod/mod16.php)|
 
 > [!WARNING]
 > Currently, `gistool` **only** extracts `ET` values from `MOD16A2.061`,

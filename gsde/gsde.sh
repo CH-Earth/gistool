@@ -139,15 +139,16 @@ lonVar="lon"
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-    module -q purge
-    module -q load gcc/9.3.0
-    module -q load r/4.1.2
-    module -q load gdal/3.0.4
-    module -q load udunits/2.2.28
-    module -q load geos/3.10.2
-    module -q load proj/9.0.0
-    module -q load nco/5.0.6
-    module -q load netcdf/4.7.4
+  module -q purge
+  module -q load StdEnv/2020
+  module -q load gcc/9.3.0
+  module -q load r/4.1.2
+  module -q load gdal/3.0.4
+  module -q load udunits/2.2.28
+  module -q load geos/3.10.2
+  module -q load proj/9.0.0
+  module -q load nco/5.0.6
+  module -q load netcdf/4.7.4
 }
 load_core_modules
 

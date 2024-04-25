@@ -67,7 +67,7 @@ do
     -i | --dataset-dir)   geotiffDir="$2"      ; shift 2 ;; # required
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -v | --variable)      variables="$2"       ; shift 2 ;; # required
-    -r | --crs)		  crs="$2"	       ; shift 2 ;; # required 
+    -r | --crs)           crs="$2"             ; shift 2 ;; # required 
     -s | --start-date)    startDate="$2"       ; shift 2 ;; # redundant - added for compatibility
     -e | --end-date)      endDate="$2"         ; shift 2 ;; # redundant - added for compatibility
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
@@ -75,11 +75,11 @@ do
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
     -F | --fid)           fid="$2"             ; shift 2 ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
-    -a | --stat)	  stats="$2"	       ; shift 2 ;; # optional
+    -a | --stat)          stats="$2"           ; shift 2 ;; # optional
     -u | --include-na)    includeNA="$2"       ; shift 2 ;; # required
-    -q | --quantile)	  quantiles="$2"       ; shift 2 ;; # optional
-    -p | --prefix)	  prefix="$2"          ; shift 2 ;; # optional
-    -c | --cache)	  cache="$2"           ; shift 2 ;; # required
+    -q | --quantile)      quantiles="$2"       ; shift 2 ;; # optional
+    -p | --prefix)        prefix="$2"          ; shift 2 ;; # optional
+    -c | --cache)         cache="$2"           ; shift 2 ;; # required
     -L | --lib-path)      renvCache="$2"       ; shift 2 ;; # required
 
     # -- means the end of the arguments; drop this, and break out of the while loop
@@ -135,13 +135,14 @@ renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-    module -q purge
-    module -q load gcc/9.3.0
-    module -q load r/4.1.2
-    module -q load gdal/3.0.4
-    module -q load udunits/2.2.28
-    module -q load geos/3.10.2
-    module -q load proj/9.0.0
+  module -q purge
+  module -q load StdEnv/2020
+  module -q load gcc/9.3.0
+  module -q load r/4.1.2
+  module -q load gdal/3.0.4
+  module -q load udunits/2.2.28
+  module -q load geos/3.10.2
+  module -q load proj/9.0.0
 }
 load_core_modules
 

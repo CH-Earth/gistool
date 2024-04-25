@@ -148,6 +148,7 @@ landcoverchangeFile="land_change_2010v2_2015v2_30m_tif.zip"
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
     module -q purge
+    module -q load StdEnv/2020
     module -q load gcc/9.3.0
     module -q load r/4.1.2
     module -q load gdal/3.0.4

@@ -2,7 +2,7 @@
 
 # Geospatial Dataset Processing Workflow
 # Copyright (C) 2022-2023, University of Saskatchewan
-# Copyright (C) 2023, University of Calgary
+# Copyright (C) 2023-2024, University of Calgary
 #
 # This file is part of the Geospatial Dataset Processing Workflow
 #
@@ -19,27 +19,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is a simple example to extract common statistics for the 
-# pfaf 71 - Saskatchewan-Nelson System Shapefiles of MERIT-Basins -
-# from the Depth-to-Bedrock rasters.
+# This is a simple example to extract common statistics for the extents 
+# of pfaf 71 - Saskatchewan-Nelson System Shapefiles of MERIT-Basin
+#
+# If you have a Shapefile containing polygons, you may able to use
+# the `--shapefile` argument to provide the Shapefile instead of spatial
+# limits. 
+#
+# If you would like to extract zonal statistics out of polygons, you can
+# use the following options as an example:
+#    --stat="mean,min,max,median,quantile" \
+#    --quantile="0.1,0.5,0.9" \
 
 # Always call the script in the root directory of this repository
 cd ..
 echo "The current directory is: $(pwd)"
 
-# first download a sample shapefile - could be any shapefile
-wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
-     "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
-
 # implement subsetting and zonal statistics
 ./extract-gis.sh --dataset="depth-to-bedrock" \
   --dataset-dir="/project/rpp-kshook/Model_Output/DTB/" \
   --variable="BDRICM_M_10km_ll,BDRLOG_M_10km_ll" \
-  --shape-file="$(pwd)/cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
+  --lat-lims="44,60" \
+  --lon-lims="-118,-78" \
   --print-geotiff=true \
   --output-dir="$HOME/scratch/depth-to-bedrock-test/" \
   --prefix="dtb_" \
-  --stat="mean,min,max" \
-  --email="you@company.ca" \ 
   -j;
 

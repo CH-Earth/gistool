@@ -70,25 +70,21 @@ at https://github.com/kasra-keshavarz/gistool/issues
 |**7**|Global Soil Dataset for Earth System Modelling (GSDE)|Not Applicable (N/A)|4326 |10.1002/2013MS000293	|[link](GSDE)	      |
 
 # General Example 
-As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Digital Alliance of Canada and have access to `MERIT-Hydro` dataset. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
+As an example, follow the code block below. Please remember that you MUST have access to Graham cluster with Digital Alliance of Canada. Also, remember to generate a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with GitHub in advance. Enter the following codes in your Graham shell as a test case:
 
 ```console
-foo@bar:~$ git clone https://github.com/kasra-keshavarz/gistool # clone the repository
+foo@bar:~$ git clone https://github.com/kasra-keshavarz/gistool.git # clone the repository
 foo@bar:~$ cd ./gistool/ # always move to the repository's directory
 foo@bar:~$ ./extract-gis.sh -h # view the usage message
-foo@bar:~$ wget -m -nd -nv -q -A "cat_pfaf_71_MERIT_Hydro_v07_Basins_v01_bugfix1.*" \
-	        "http://hydrology.princeton.edu/data/mpan/MERIT_Basins/MERIT_Hydro_v07_Basins_v01_bugfix1/pfaf_level_02/"; 
-	        # downloading a sample shapefile
-foo@bar:~$ ./extract-gis.sh  --dataset="merit-hydro" \
-                             --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
-                             --output-dir="$HOME/scratch/merit-hydro-test" \
-			     --shape-file="./cat_pfaf_67_MERIT_Hydro_v07_Basins_v01_bugfix1.shp" \
-			     --print-geotiff=true \
-			     --stat="min,max,mean,median,quantile" \
-			     --quantile="0.1,0.5,0.9" \
-                             --variable="elv,hnd" \
-                             --prefix="merit_test_";
-
+foo@bar:~$ ./extract-gis.sh \
+  --dataset="merit-hydro" \
+  --dataset-dir="/project/rpp-kshook/CompHydCore/merit_hydro/raw_data/" \
+  --output-dir="$HOME/scratch/merit-hydro-test" \
+  --lat-lims="45,47" \
+  --lon-lims="-120,-117" \
+  --print-geotiff=true \
+  --variable="elv,hnd" \
+  --prefix="merit_test_";
 ```
 See the [example](./example) directory for real-world scripts for each geospatial dataset included in this repository.
 

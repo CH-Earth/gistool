@@ -1,8 +1,7 @@
 #!/bin/bash
 # GIS Data Processing Workflow
-# Copyright (C) 2022-2023, University of Saskatchewan
-# Copyright (C) 2023, University of Calgary
-# Copyright (C) 2021, Wouter Knoben
+# Copyright (C) 2023-2024, University of Calgary
+# Copyright (C) 2022-2024, University of Saskatchewan
 #
 # This file is part of GIS Data Processing Workflow
 #
@@ -41,12 +40,12 @@
 # Usage Functions
 # ===============
 short_usage() {
-  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-F STR] [-t BOOL] [-a stat1[,stat2,[...]] [-u BOOL] [-q q1[,q2[...]]]] [-p STR] "
+  echo "usage: $(basename $0) -cio DIR -v var1[,var2[...]] [-r INT] [-se DATE] [-ln REAL,REAL] [-f PATH] [-F STR] [-t BOOL] [-a stat1[,stat2,[...]] [-q q1[,q2[...]]]] [-p STR] "
 }
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n gsde -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
+parsedArguments=$(getopt -a -n nhm -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;
@@ -67,16 +66,16 @@ do
     -i | --dataset-dir)   geotiffDir="$2"      ; shift 2 ;; # required
     -o | --output-dir)    outputDir="$2"       ; shift 2 ;; # required
     -v | --variable)      variables="$2"       ; shift 2 ;; # required
-    -r | --crs)           crs="$2"             ; shift 2 ;; # required
+    -r | --crs)           crs="$2"             ; shift 2 ;; # required 
     -s | --start-date)    startDate="$2"       ; shift 2 ;; # redundant - added for compatibility
     -e | --end-date)      endDate="$2"         ; shift 2 ;; # redundant - added for compatibility
     -l | --lat-lims)      latLims="$2"         ; shift 2 ;; # required - could be redundant
     -n | --lon-lims)      lonLims="$2"         ; shift 2 ;; # required - could be redundant
     -f | --shape-file)    shapefile="$2"       ; shift 2 ;; # required - could be redundant
-    -F | --fid)           fid="$2"             ; shift 2 ;; # required
+    -F | --fid)           fid="$2"             ; shift 2 ;; # optional
     -t | --print-geotiff) printGeotiff="$2"    ; shift 2 ;; # required
     -a | --stat)          stats="$2"           ; shift 2 ;; # optional
-    -u | --include-na)	  includeNA="$2"       ; shift 2 ;; # required
+    -u | --include-na)    includeNA="$2"       ; shift 2 ;; # required
     -q | --quantile)      quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)        prefix="$2"          ; shift 2 ;; # optional
     -c | --cache)         cache="$2"           ; shift 2 ;; # required
@@ -100,7 +99,7 @@ fi
 
 # check the prefix if not set
 if [[ -z $prefix ]]; then
-  prefix="gsde_"
+  prefix="nhm_"
 fi
 
 # parse comma-delimited variables
@@ -118,10 +117,6 @@ shopt -s expand_aliases
 # necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
 renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
-
-# some variables
-latVar="lat"
-lonVar="lon"
 
 
 # ==========================
@@ -147,8 +142,6 @@ load_core_modules () {
   module -q load udunits/2.2.28
   module -q load geos/3.10.2
   module -q load proj/9.0.0
-  module -q load nco/5.0.6
-  module -q load netcdf/4.7.4
 }
 load_core_modules
 
@@ -173,7 +166,7 @@ logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
 #            limits
 #
 # Arguments:
-#   sourceNc: source netcdf file
+#   sourceVrt: source vrt file
 #   destPath: destionation path (inclu-
 #	      ding file name)
 #
@@ -190,7 +183,7 @@ subset_geotiff () {
   local sortedLats
   local sortedLons
   # reading arguments
-  local sourceNc="$1"
+  local sourceVrt="$1"
   local destPath="$2"
 
   # extracting minimum and maximum of latitude and longitude respectively
@@ -203,8 +196,13 @@ subset_geotiff () {
   lonMin="${sortedLons[0]}"
   lonMax="${sortedLons[1]}"
 
-  # subset netCDF file
-  ncks -d $latVar,$latMin,$latMax -d $lonVar,$lonMin,$lonMax "${sourceNc}" "${destPath}"
+  # subset based on lat/lon - flush to disk at 500MB
+  GDAL_CACHEMAX=500
+  gdal_translate --config GDAL_CACHEMAX 500 \
+    -co COMPRESS="DEFLATE" \
+    -co BIGTIFF="YES" \
+    -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
+    > /dev/null;
 }
 
 
@@ -212,11 +210,12 @@ subset_geotiff () {
 # Data Processing
 # ===============
 # display info
-echo "$(logDate)$(basename $0): processing Soil-Grids-v1 GeoTIFF(s)..."
+echo "$(logDate)$(basename $0): processing USGS-NHM GeoTIFF(s)..."
 
 # make the output directory
 echo "$(logDate)$(basename $0): creating output directory under $outputDir"
 mkdir -p "$outputDir" # making the output directory
+mkdir -p "$cache" # making the cache directory
 
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then
@@ -239,25 +238,22 @@ if [[ -n $shapefile ]]; then
   latLims="${leftBottomLims[1]},${rightTopLims[1]}"
 fi
 
-# modifying variable names to conform to that of the dataset's standard
-variablesMod=();
+# extracting contents of the .zip file
 for var in "${variables[@]}"; do
-  for name in "$var"{1..2}; do
-    variablesMod+=("${name}")
-  done
-done
-
-# unzip files
-for var in "${variablesMod[@]}"; do
-  unzip "${geotiffDir}/${var}" -d "$cache"
+  # create temporary directories for each variable
+  mkdir -p "$cache/$var"
+  # unzip
+  unzip "$geotiffDir/${var}.zip" -d "$cache/${var}/"
+  # build vrt
+  gdalbuildvrt "${cache}/${var}.vrt" ${cache}/${var}/*.tif -resolution highest -sd 1 > /dev/null
 done
 
 # subset and produce stats if needed
 if [[ "$printGeotiff" == "true" ]]; then
   echo "$(logDate)$(basename $0): subsetting GeoTIFFs under $outputDir"
-  for var in "${variablesMod[@]}"; do
+  for var in "${variables[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${var}.nc" "${outputDir}/${prefix}${var}.nc"
+    subset_geotiff "${cache}/${var}.vrt" "${outputDir}/${prefix}${var}.tif"
   done
 fi
 
@@ -275,21 +271,21 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   tempInstallPath="$cache/r-packages"
   mkdir -p "$tempInstallPath"
   export R_LIBS_USER="$tempInstallPath"
- 
+
   # extract given stats for each variable
-  for var in "${variablesMod[@]}"; do
+  for var in "${variables[@]}"; do
     ## build renv and create stats
     Rscript "$(dirname $0)/../assets/stats.R" \
       "$tempInstallPath" \
       "$exactextractrCache" \
       "$renvPackagePath" \
-      "$virtualEnvPath" \
-      "$virtualEnvPath" \
-      "${virtualEnvPath}/renv.lock" \
-      "${cache}/${var}.nc" \
-      "$shapefile" \
-      "$outputDir/${prefix}stats_${var}.csv" \
-      "$stats" \
+	    "$virtualEnvPath" \
+	    "$virtualEnvPath" \
+	    "${virtualEnvPath}/renv.lock" \
+	    "${cache}/${var}.vrt" \
+	    "$shapefile" \
+	    "$outputDir/${prefix}stats_${var}.csv" \
+	    "$stats" \
 	    "$includeNA" \
 	    "$quantiles" \
 	    "$fid" >> "${outputDir}/${prefix}stats_${var}.log" 2>&1;

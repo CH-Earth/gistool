@@ -376,6 +376,8 @@ rasterProj4="$(gdalsrsinfo "${tempTif}" | grep -e "PROJ.4" | cut -d ':' -f2)"
 if [[ -n $shapefile ]]; then
   # create latLims and lonLims variables specifying the limits of the ESRI Shapefile
   extract_shapefile_extents "${shapefile}" "${rasterProj4}"
+else
+  sourceProj4="EPSG:4326"
 fi
 
 # subset and produce stats if needed

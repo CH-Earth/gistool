@@ -176,6 +176,7 @@ logDate () { echo "($(date +"%Y-%m-%d %H:%M:%S")) "; }
 #            limits
 #   lonLims: comma-delimited longitude
 #            limits
+#   sourceProj4: the extents projection
 #
 # Arguments:
 #   sourceVrt: source vrt file
@@ -208,13 +209,14 @@ subset_geotiff () {
   lonMin="${sortedLons[0]}"
   lonMax="${sortedLons[1]}"
 
-  # subset based on lat/lon - flush to disk at 500MB
+  # subset based on lat/lon in their given projection - flush to disk at 500MB
   GDAL_CACHEMAX=500
   gdal_translate --config GDAL_CACHEMAX 500 \
-  		 -co COMPRESS="DEFLATE" \
-  		 -co BIGTIFF="YES" \
-		 -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
-		 > /dev/null;
+    -co COMPRESS="DEFLATE" \
+    -co BIGTIFF="YES" \
+    -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
+    -projwin_srs "$sourceProj4" \
+    > /dev/null;
 }
 
 #######################################
@@ -239,9 +241,11 @@ subset_geotiff () {
 extract_shapefile_extents () {
   # local variables
   local shapefileExtents # ogrinfo output containing ESIR Shapefile extents
-  local sourceProj4 # projection in proj4 format
   local leftBottomLims # left bottom coordinates (min lon, min lat)
   local rightTopLims # top right coordinates (max lon, max lat)
+
+  # global variables:
+  # - $sourceProj4
 
   # reading arguments
   local shapefilePath=$1
@@ -283,66 +287,6 @@ extract_shapefile_extents () {
   latLims="${lowerLeftLims[1]},${upperRightLims[1]}"
 }
 
-#######################################
-# Transform projection based on source
-#     Proj4 string
-#
-# Globals:
-#   None
-#
-# Arguments:
-#   sourceProj4: string describing
-#                source projection
-#   coords: comma-separated coordinate
-#	    values
-#   coordsDelim: delimited in the 
-#    		 $coords variable
-#   transformDelim: delimtied in the
-# 		    transformed values
-#   destEPSG: EPSG value of the
-#	      destination projection
-#	      (default 'EPSG:4326')
-#
-# Outputs:
-#   comma-delimited $coords in the
-#   $destEPSG format
-#######################################
-transform_coords () {
-  # local variables
-  local sourceProj4="$1"
-  local coords="$2"
-  local coordsDelim="$3"
-  local transformDelim="$4"
-  local destEPSG="$5"
-  # local variables assigned in the function
-  local coordsBlankDel
-  local coordsTrans
-
-  # if $destEPSG not provided, use EPSG:4326 by default
-  if [[ -z $destEPSG ]]; then
-    destEPSG='EPSG:4326'
-  fi
-
-  # if $coordsDelim not provided, use comma ',' by default
-  if [[ -z $coordsDelim ]]; then
-    coordsDelim=','
-  fi
-
-  # substituting comma with a blank space
-  coordsBlankDel=$(echo "$coords" | tr "${coordsDelim}" ' ')
-
-  # transforming coords
-  coordsTrans=$(echo "$coordsBlankDel" | gdaltransform -s_srs "${sourceProj4}" -t_srs "${destEPSG}" -output_xy)
-
-  # subtitute blank space with $transformDelim value
-  if [[ -n $transformDelim ]]; then
-    coordsTrans=$(echo "$coordsTrans" | tr ' ' $transformDelim)
-  fi
-  
-  # echo-ing $coordsTrans variable
-  echo "${coordsTrans}"
-}
-
 
 # ===============
 # Data Processing
@@ -370,13 +314,13 @@ for var in "${variables[@]}"; do
       ### check if the $startDate and $endDate variables are set
       if [[ -z ${startDate} ]] || [[ -z ${endDate} ]]; then
         echo "$(logDate)$(basename $0): ERROR! Both"' `--start-date` and `--end-date` must be provided'
-	exit 1;
+        exit 1;
       fi
       # extract the entered years and populate $files array
       for y in "${validYears[@]}"; do
         if [[ "$y" -ge "${startDate}" ]] && [[ "$y" -le "${endDate}" ]]; then
-	  files+=("${landcoverPrefix}${y}")
-	fi
+          files+=("${landcoverPrefix}${y}")
+        fi
       done
       ;;
 
@@ -385,7 +329,7 @@ for var in "${variables[@]}"; do
       ### check if the $startDate and $endDate variables are provided
       if [[ -n ${startDate} ]] || [[ -n ${endDate} ]]; then
         echo "$(logDate)$(basename $0): WARNING! For land-cover-change, only the difference for the 2010-2015 period is available"
-	echo "$(logDate)$(basename $0)"': WARNING! The `--start-date` and `--end-date` arguments are ignored for '"${var}"
+        echo "$(logDate)$(basename $0)"': WARNING! The `--start-date` and `--end-date` arguments are ignored for '"${var}"
       fi
       # populate $files array
       files+=("$landcoverchangeFile")
@@ -408,7 +352,7 @@ fi
 filesComplete=()
 # populating filesComplete array
 for f in "${files[@]}"; do
- filesComplete+=($(ls -d ${geotiffDir}/${f}* | xargs -n 1 basename))
+  filesComplete+=($(ls -d ${geotiffDir}/${f}* | xargs -n 1 basename))
 done
 
 # extracting the .zip files
@@ -432,6 +376,8 @@ rasterProj4="$(gdalsrsinfo "${tempTif}" | grep -e "PROJ.4" | cut -d ':' -f2)"
 if [[ -n $shapefile ]]; then
   # create latLims and lonLims variables specifying the limits of the ESRI Shapefile
   extract_shapefile_extents "${shapefile}" "${rasterProj4}"
+else
+  sourceProj4="EPSG:4326"
 fi
 
 # subset and produce stats if needed
@@ -441,7 +387,7 @@ if [[ "${printGeotiff,,}" == "true" ]]; then
   
   for tif in "${tiffs[@]}"; do
     # subset based on lat and lon values
-    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}" "$latLims" "$lonLims"
+    subset_geotiff "${cache}/${tif}" "${outputDir}/${prefix}${tif}" "$latLims" "$lonLims" "$sourceProj4"
   done
 fi
 

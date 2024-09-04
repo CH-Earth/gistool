@@ -425,6 +425,11 @@ case "${geotiff,,}" in
     call_processing_func "$(dirname $0)/soil_class/soil_class.sh"
     ;;
 
+  # NHM layers
+  "nhm" | "tgf" | "gf" )
+    call_processing_func "$(dirname $0)/nhm/nhm.sh"
+    ;;
+
   # dataset not included above
   *)
     echo "$(basename $0): missing/unknown dataset";

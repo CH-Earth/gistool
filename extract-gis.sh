@@ -372,7 +372,7 @@ call_processing_func () {
 	#SBATCH --mail-type=BEGIN,END,FAIL
 	#SBATCH ${parsable}
 
-	srun ${scriptRun} --cache="${cache}-\${SLURM_JOB_ID}" 
+	srun ${scriptRun} --cache="${cache}/\${SLURM_JOB_ID}" 
 	EOF
     # echo message
     if [[ -z parsable ]]; then

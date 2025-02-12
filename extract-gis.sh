@@ -98,7 +98,7 @@ currently available datasets are:
     7) soilclasses (doi: 10.4211/hs.1361509511e44adfba814f6950c6e742, based on Soil Grids v1)
 
 For bug reports, questions, and discussions open an issue
-at https://github.com/kasra-keshavarz/gistool/issues" >&1;
+at https://github.com/CH-Earth/gistool/issues" >&1;
 
   exit 0;
 }

@@ -98,8 +98,7 @@ processing is not submitted as a job, then the logs are printed on screen.
 # `--lib-path` options
 Currently, on Graham HPC, the following options are available:
 ```console
-/project/rpp-kshook/Climate_Forcing_Data/assets/r-envs/ # default, rpp-kshook allocation
-/project/rrg-mclark/lib # rrg-mclark allocation
+/work/comphyd_lab/envs/r-env/ # UCalgary's ARC cluster
 ```
 
 

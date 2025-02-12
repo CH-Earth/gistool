@@ -116,7 +116,7 @@ shopt -s expand_aliases
 
 # necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
-renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
+renvPackagePath="${renvCache}/renv_1.1.1.tar.gz" # renv_1.1.1 source path
 
 
 # ==========================
@@ -134,14 +134,11 @@ renvPackagePath="${renvCache}/renv_0.16.0.tar.gz" # renv_0.16.0 source path
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-  module -q purge
-  module -q load StdEnv/2020
-  module -q load gcc/9.3.0
-  module -q load r/4.1.2
-  module -q load gdal/3.0.4
-  module -q load udunits/2.2.28
-  module -q load geos/3.10.2
-  module -q load proj/9.0.0
+  module load r
+  module load gdal
+  module load udunits
+  module load geos
+  module load proj
 }
 load_core_modules
 

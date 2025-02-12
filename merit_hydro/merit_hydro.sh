@@ -133,12 +133,11 @@ renvPackagePath="${renvCache}/renv_1.1.1.tar.gz" # renv_1.1.1 source path
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-  module -q purge
-  module -q load r
-  module -q load gdal
-  module -q load udunits
-  module -q load geos
-  module -q load proj
+  module load r
+  module load gdal
+  module load udunits
+  module load geos
+  module load proj
 }
 load_core_modules
 

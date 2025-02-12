@@ -54,7 +54,7 @@ Script options:
   -h, --help				Show this screen and exit
 
 For bug reports, questions, and discussions open an issue
-at https://github.com/kasra-keshavarz/gistool/issues
+at https://github.com/CH-Earth/gistool/issues
 ```
 
 

@@ -147,11 +147,12 @@ landcoverchangeFile="land_change_2010v2_2015v2_30m_tif.zip"
 # ===================
 # Modules below available on Compute Canada (CC) Graham Cluster Server
 load_core_modules () {
-    module load r
-    module load gdal
-    module load udunits
-    module load geos
-    module load proj
+  module load r
+  module load p7zip
+  module load gdal
+  module load udunits
+  module load geos
+  module load proj
 }
 load_core_modules
 

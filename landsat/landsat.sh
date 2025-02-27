@@ -409,9 +409,9 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
     IFS='.' read -ra fileName <<< "$tif"
     ## build renv and create stats
     Rscript "$(dirname $0)/../assets/stats.R" \
-    	    "$tempInstallPath" \
-  	    "$exactextractrCache" \
-  	    "$renvPackagePath" \
+      "$tempInstallPath" \
+      "$exactextractrCache" \
+      "$renvPackagePath" \
 	    "$virtualEnvPath" \
 	    "$virtualEnvPath" \
 	    "${virtualEnvPath}/renv.lock" \

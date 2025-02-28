@@ -1,6 +1,7 @@
 # Geospatial Dataset Processing Workflow
 # Copyright (C) 2022-2023, University of Saskatchewan
-# Copyright (C) 2023, Univeristy of Calgary
+# Copyright (C) 2023-2025, Univeristy of Calgary
+# Copyright (C) 2022-2025, gistool developers
 #
 # This file is part of the Geospatial Dataset Processing Workflow
 #

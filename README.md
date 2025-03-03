@@ -8,50 +8,46 @@ Usage:
   extract-gis [options...]
 
 Script options:
-  -d, --dataset				Geospatial dataset of interest
-  -i, --dataset-dir=DIR			The source path of the dataset file(s)
-  -r, --crs=INT				The EPSG code of interest; optional
-  					[defaults to 4326]
-  -v, --variable=var1[,var2[...]]	If applicable, variables to process
-  -o, --output-dir=DIR			Writes processed files to DIR
-  -s, --start-date=DATE			If applicable, start date of the geospatial
-  					data; optional
-  -e, --end-date=DATE			If applicable, end date of the geospatial
-  					data; optional
-  -l, --lat-lims=REAL,REAL		Latitude's upper and lower bounds; optional
-  -n, --lon-lims=REAL,REAL		Longitude's upper and lower bounds; optional
-  -f, --shape-file=PATH			Path to the ESRI '.shp' file; optional
-  -F, --fid=STR				Column name representing elements of the
-  					ESRI Shapefile to report statistics; optional
-					defaults to the first column
-  -j, --submit-job			Submit the data extraction process as a job
-					on the SLURM system; optional
-  -t, --print-geotiff=BOOL		Extract the subsetted GeoTIFF file; optional
-  					[defaults to 'true']
-  -a, --stat=stat1[,stat2[...]]		If applicable, extract the statistics of
-  					interest, currently available options are:
-					'min';'max';'mean';'majority';'minority';
-					'median';'quantile';'variety';'variance';
-					'stdev';'coefficient_of_variation';'frac';
-					'coords'; 'count'; 'sum'; optional
-  -U, --include-na			Include NA values in generated statistics;
-  					optional 
-  -q, --quantile=q1[,q2[...]]		Quantiles of interest to be produced if 'quantile'
-  					is included in the '--stat' argument. The values
-					must be comma delimited float numbers between
-					0 and 1; optional [defaults to every 5th quantile]
-  -p, --prefix=STR			Prefix  prepended to the output files
-  -b, --parsable			Parsable SLURM message mainly used
-  					for chained job submissions
-  -c, --cache=DIR			Path of the cache directory; optional
-  -E, --email=STR			E-mail when job starts, ends, and 
-  					fails; optional
-  -u, --account				Digital Research Alliance of Canada's sponsor's
-  					account name; optional, defaults to 'rpp-kshook'
-  -L, --lib-path			Path to the shared libraries needed; optional,
-  					see the source code for the default path
-  -V, --version				Show version
-  -h, --help				Show this screen and exit
+  -d, --dataset                    Geospatial dataset of interest
+  -i, --dataset-dir=DIR            The source path of the dataset file(s)
+  -r, --crs=INT                    The EPSG code of interest; optional
+                                   [defaults to 4326]
+  -v, --variable=var1[,var2[...]]  If applicable, variables to process
+  -o, --output-dir=DIR             Writes processed files to DIR
+  -s, --start-date=DATE            If applicable, start date of the geospatial
+                                   data; optional
+  -e, --end-date=DATE              If applicable, end date of the geospatial
+                                   data; optional
+  -l, --lat-lims=REAL,REAL         Latitude's upper and lower bounds; optional
+  -n, --lon-lims=REAL,REAL         Longitude's upper and lower bounds; optional
+  -f, --shape-file=PATH            Path to the ESRI '.shp' file; optional
+  -F, --fid=STR                    Column name representing elements of the
+                                   Polygons to report statistics; optional
+                                   [defaults to the first column]
+  -j, --submit-job                 Submit the data extraction process as a job
+                                   to HPC's scheduler; optional
+  -t, --print-geotiff=BOOL         Extract the subsetted GeoTIFF file; optional
+                                   [defaults to 'true']
+  -a, --stat=stat1[,stat2[...]]		 If applicable, extract the statistics of
+                                   interest, currently available options are:
+                                   'min';'max';'mean';'majority';'minority';
+                                   'median';'quantile';'variety';'variance';
+                                   'stdev';'coefficient_of_variation';'frac';
+                                   'coords'; 'count'; 'sum'; optional
+  -U, --include-na                 Include NA values in generated
+                                   statistics, optional 
+  -q, --quantile=q1[,q2[...]]      Quantiles of interest to be produced if 'quantile'
+                                   is included in the '--stat' argument. The values
+                                   must be comma delimited float numbers between
+                                   0 and 1; optional [defaults to every 5th quantile]
+  -p, --prefix=STR                 Prefix  prepended to the output files
+  -b, --parsable                   Parsable SLURM message mainly used
+                                   for chained job submissions
+  -c, --cache=DIR                  Path of the cache directory; optional
+  -E, --email=STR                  E-mail when job starts, ends, and fails; optional
+  -C, --cluster=JSON                JSON file detailing cluster-specific details
+  -V, --version                    Show version
+  -h, --help                       Show this screen and exit
 
 For bug reports, questions, and discussions open an issue
 at https://github.com/CH-Earth/gistool/issues
@@ -117,7 +113,8 @@ Please open a new ticket on the **Issues** tab of the current repository in case
 # License
 Geospatial Dataset Processing Workflow<br>
 Copyright (C) 2022-2023, University of Saskatchewan<br>
-Copyright (C) 2023-2024, University of Calgary<br>
+Copyright (C) 2023-2025, University of Calgary<br>
+Copyright (C) 2022-2025, gistool developers
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

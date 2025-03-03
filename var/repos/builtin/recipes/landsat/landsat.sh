@@ -46,7 +46,17 @@ short_usage() {
 
 
 # argument parsing using getopt - WORKS ONLY ON LINUX BY DEFAULT
-parsedArguments=$(getopt -a -n landsat -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: --long dataset-dir:,output-dir:,variable:,crs:,start-date:,end-date:,lat-lims:,lon-lims:,shape-file:,fid:,print-geotiff:,stat:,include-na:,quantile:,prefix:,cache:,lib-path: -- "$@")
+parsedArguments=$( \
+  getopt --alternative \
+  --name landsat \
+  -o i:o:v:r:s:e:l:n:f:F:t:a:u:q:p:c:L: \
+  --long dataset-dir:,output-dir:, \
+  --long variable:,crs:,start-date:, \
+  --long end-date:,lat-lims:,lon-lims:, \
+  --long shape-file:,fid:,print-geotiff:, \
+  --long stat:,include-na:,quantile:,prefix:, \
+  --long cache:,lib-path: \
+  -- "$@")
 validArguments=$?
 if [ "$validArguments" != "0" ]; then
   short_usage;

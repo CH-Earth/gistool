@@ -1,6 +1,5 @@
 {
     "environment_variables": {
-        "array_task_id": "$SLURM_ARRAY_TASK_ID",
-        "array_job_id": "$SLURM_ARRAY_JOB_ID"
+        "job_id": "SLURM_JOB_ID"
     }
 }

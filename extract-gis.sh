@@ -115,23 +115,25 @@ alias date='TZ=UTC date'
 # expand aliases for the one stated above
 shopt -s expand_aliases
 
+# local paths
+schedulersPath="$(dirname $0)/etc/schedulers/"
+scriptPath="$(dirname $0)/share/m4_templates/" # core script path
+recipePath="$(realpath $(dirname $0)/var/repos/builtin/recipes/)"
+
 
 # =======================
 # Parsing input arguments
 # =======================
 # argument parsing using getopt - 
-# ATTENTION: `getopt` is available by default on most GNU/Linux 
-#	     distributions, however, it may not work out of the
-#	     box on MacOS or BSD
 parsedArguments=$( \
   getopt --alternative \
   --name "extract-dataset" \
-  -o d:i:r:v:o:s:e:l:n:f:F:jt:a:Uq:p:c:L:E:u:Vhb \
+  -o d:i:r:v:o:s:e:l:n:f:F:jt:a:Uq:p:c:E:C:Vhb \
   --long dataset:,dataset-dir:,crs:,variable:, \
   --long output-dir:,start-date:,end-date:,lat-lims:, \
   --long lon-lims:,shape-file:,fid:,submit-job, \
   --long print-geotiff:,stat:,include-na,quantile:, \
-  --long prefix:,cache:,email:, \
+  --long prefix:,cache:,email:,cluster:, \
   --long version,help,parsable -- "$@" \
 )
 
@@ -192,14 +194,13 @@ if [[ -z "${geotiffDir}" ]] || \
    [[ -z "${geotiff}"    ]] || \
    [[ -z "${variables}"  ]] || \
    [[ -z "${outputDir}"  ]] || \
-   [[ -z "${cluster}"    ]] || \ 
+   [[ -z "${cluster}"    ]] || \
    [[ -z "${prefixStr}"  ]]; then
 
    echo "$(basename $0): mandatory option(s) missing.";
    short_usage;
    exit 1;
 fi
-
 
 # ==================
 # Basic dependencies
@@ -210,6 +211,12 @@ if [[ -z $cluster ]]; then
   exit 1
 fi
 
+# `jq' is the only basic dependency needed to run this file
+# initialize the cluster-dependent settings
+inits="$(jq -r '.modules.init | join("; ")' $cluster)"
+if [[ -n "$inits" ]]; then
+  eval $inits
+fi
 
 # ==============
 # Routine checks
@@ -301,6 +308,40 @@ if [[ -z $fid ]] && [[ -n $stats  ]]; then
   fi
 fi
 
+#######################################
+# Create m4 variable definitions to be
+# used in m4 macro calls in CLI from 
+# JSON objects
+#
+# Globals:
+#   None
+#
+# Arguments:
+#   1: JSON object
+#
+# Outputs:
+#   A string in "-D__KEY__=$value"
+#   format of all the fields of a JSON
+#   object
+#######################################
+function json_to_m4_vars () {
+  # local variables
+  local json="$1"
+
+  # echo the string using jq>1.6
+  echo "$json" | jq -r \
+    'to_entries |
+     map(select(.value != null and .value != "")) |
+     map(
+         "-D" +
+         "__" +
+         (.key | tostring | ascii_upcase) +
+         "__" + "=" +
+         (.value | tostring)
+     ) |
+     join(" ")'
+}
+
 
 # ======================
 # Necessary Preparations
@@ -330,15 +371,15 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
 # =================================
 # Template data processing function
 # =================================
-call_processing_func () {
+function call_processing_func () {
 
   # input local variables
   local scriptFile="$1" # script local path
-  local chunkTStep="$2" # chunking time-frame periods
 
   # local variables with assignment 
-  local scriptName=$(basename $script | cut -d '.' -f 1)
-  local logDir="$HOME/.datatool/${scriptName}_$(logDirDate)/"
+  local scriptName=$(basename $scriptFile | cut -d '.' -f 1)
+  local logDir="$HOME/.gistool/${scriptName}_$(logDirDate)/"
+  local libPath="$(jq '.["lib-path"]' $cluster)"
 
   # local variable without assignment
   local script
@@ -360,26 +401,26 @@ call_processing_func () {
 
   # typical script to run for all recipes
   script=$(cat <<- EOF
-  bash ${scriptFile} \
-  --dataset-dir="${funcArgs[geotiffDir]}" \
-  --crs="${funcArgs[crs]}" \
-  --variable="${funcArgs[variables]}" \
-  --output-dir="${funcArgs[outputDir]}" \
-  --start-date="${funcArgs[startDate]}" \
-  --end-date="${funcArgs[endDate]}" \
-  --lat-lims="${funcArgs[latLims]}" \
-  --lon-lims="${funcArgs[lonLims]}" \
-  --shape-file="${funcArgs[shapefile]}" \
-  --fid="${funcArgs[fid]}" \
-  --print-geotiff="${funcArgs[printGeotiff]}" \
-  --stat="${funcArgs[stats]}" \
-  --include-na="${funcArgs[includeNA]}" \
-  --quantile="${funcArgs[quantiles]}" \
-  --prefix="${funcArgs[prefixStr]}" \
-  --cache="${funcArgs[cache]}" \
-  --cluster="${funcArgs[cluster]}"
-  EOF
-  )
+	bash ${scriptFile} \
+	--dataset-dir="${funcArgs[geotiffDir]}" \
+	--crs="${funcArgs[crs]}" \
+	--variable="${funcArgs[variables]}" \
+	--output-dir="${funcArgs[outputDir]}" \
+	--start-date="${funcArgs[startDate]}" \
+	--end-date="${funcArgs[endDate]}" \
+	--lat-lims="${funcArgs[latLims]}" \
+	--lon-lims="${funcArgs[lonLims]}" \
+	--shape-file="${funcArgs[shapefile]}" \
+	--fid="${funcArgs[fid]}" \
+	--print-geotiff="${funcArgs[printGeotiff]}" \
+	--stat="${funcArgs[stats]}" \
+	--include-na="${funcArgs[includeNA]}" \
+	--quantile="${funcArgs[quantiles]}" \
+	--prefix="${funcArgs[prefixStr]}" \
+	--cache="${funcArgs[cache]}" \
+	--lib-path="${funcArgs[libPath]}"
+	EOF
+	)
 
   # ==============================
   # Building relevant JSON objects
@@ -436,31 +477,80 @@ call_processing_func () {
 
   # evaluate the script file using the arguments provided
   if [[ "${funcArgs[jobSubmission]}" == true ]]; then
-    # SLURM batch file
-    sbatch <<- EOF
-	#!/bin/bash
-	#SBATCH --cpus-per-task=4
-	#SBATCH --nodes=1
-	#SBATCH --account=$account
-	#SBATCH --time=04:00:00
-	#SBATCH --mem=16000MB
-	#SBATCH --job-name=GIS_${scriptName}
-	#SBATCH --error=$logDir/GIS_%j_err.txt
-	#SBATCH --output=$logDir/GIS_%j.txt
-	#SBATCH --mail-user=$email
-	#SBATCH --mail-type=BEGIN,END,FAIL
-	#SBATCH ${parsable}
+    # determining job script path
+    local jobScriptPath="$logDir/job.${scheduler}"
+    local jobConfPath="$logDir/job.json"
 
-	srun ${scriptRun} --cache="${cache}/\${SLURM_JOB_ID}" 
-	EOF
-    # echo message
-    if [[ -z parsable ]]; then
-      echo "$(basename $0): job submission details are printed under ${logDir}"
-    fi
- 
+    # create JSON config file for final submission
+    JSON="$( 
+      jq -n \
+        --argjson "jobscript" "$jobScriptJSON" \
+        --argjson "jobdirective" "$jobDirectiveJSON" \
+        --argjson "scheduler" "$schedulerJSON" \
+        '$jobscript + 
+         $jobdirective + 
+         $scheduler' \
+      )"
+    # job submission mode
+    # exporting job configurations as a JSON to the job $logDir
+    echo "$JSON" > "$jobConfPath"
+
+    # generating the submission script using m4 macros
+    # m4 variables defined
+    # m4 variables are in the following form: __VAR__
+    jobDirectiveM4="$(json_to_m4_vars "$jobDirectiveJSON")"
+    # append the main processing script using m4 macros
+    jobScriptM4="-D__CONF__=$jobConfPath "
+    jobScriptM4+="$(json_to_m4_vars "$schedulerJSON") "
+
+    # create scheduler-specific job submission script
+    # 1. job scheduler directives
+    m4 ${jobDirectiveM4} ${schedulersPath}/${scheduler}.m4 > \
+      ${jobScriptPath}
+
+    # 2. module inititation, if applicable
+    echo -e "\n${jobModulesInit}" >> "${jobScriptPath}"
+
+    # 3. loading core modules, if applicable
+    echo -e "\n${jobModules}" >> "${jobScriptPath}"
+
+    # 4. main body of script
+    m4 ${jobScriptM4} ${scriptPath}/job.m4 >> \
+      ${jobScriptPath}
+
+    # choose applicable scheduler and submit the job
+    case "${scheduler,,}" in 
+      "slurm")
+        sbatch --export=NONE ${jobScriptPath} ;;
+      "pbs")
+        qsub ${jobScriptPath} ;;
+      "lfs")
+        bsub --env=none ${jobScriptPath} ;;
+    esac
+
   else
-    eval "$scriptRun"
+    # interactive mode
+    # load all the necessary modules
+    mods="$( \
+      jq -r \
+        '.modules | 
+        to_entries | 
+        map(
+          select(
+            .value | 
+            type != "array" and . != ""
+            )
+        ) | 
+        map(.value) | 
+        join(" && ")' \
+      $cluster)"
+    # initialize (if needed) and load modules
+    eval "$mods"
+    # run the recipe script here
+    eval "${script}"
+
   fi
+  # done
 }
 
 
@@ -469,44 +559,46 @@ call_processing_func () {
 # ======================
 
 case "${geotiff,,}" in
-  # MERIT Hydro
+  # MERIT Hydro dataset
   "merithydro" | "merit hydro" | "merit-hydro" | "merit_hydro")
-    call_processing_func "$(dirname $0)/merit_hydro/merit_hydro.sh"
+    call_processing_func "$recipePath/merit_hydro/merit_hydro.sh"
     ;;
 
-  # Soil Grids v1
+  # Soil Grids version 1 dataset
   "soil-grids-v1" | "soilgridsv1" | "soil_grids_v1" | "soil grids v1")
-    call_processing_func "$(dirname $0)/soil_grids/soil_grids_v1.sh"
+    call_processing_func "$recipePath/soil_grids/soil_grids_v1.sh"
     ;;
 
-  # MODIS
+  # MODIS various datasets
   "modis")
-    call_processing_func "$(dirname $0)/modis/modis.sh"
+    call_processing_func "$recipePath/modis/modis.sh"
     ;;
 
-  # GSDE
+  # Global Soil Dataset for Earth System Modelling (GSDE) dataset
   "gsde")
-    call_processing_func "$(dirname $0)/gsde/gsde.sh"
+    call_processing_func "$recipePath/gsde/gsde.sh"
     ;;
   
-  # Depth to Bedrock
+  # Global Depth to Bedrock dataset
   "depth-to-bedrock" | "depth_to_bedrock" | "dtb" | "depth-to_bedrock" | "depth_to_bedrock")
-    call_processing_func "$(dirname $0)/depth_to_bedrock/depth_to_bedrock.sh"
+    call_processing_func "$recipePath/depth_to_bedrock/depth_to_bedrock.sh"
     ;;
   
-  # Landsat
+  # Commission for Environmental Cooperation (CEC) North American Land Cover
+  # Monitoring System (NALCMS) Landsat-based (and MODIS-) dataset
   "landsat" | "landast" )
-    call_processing_func "$(dirname $0)/landsat/landsat.sh"
+    call_processing_func "$recipePath/landsat/landsat.sh"
     ;;
 
-  # soil_class
+  # Global USDA-NRCS Soil Texture Class Map based on Soil Grids Version 1
+  # dataset
   "soil_class" )
-    call_processing_func "$(dirname $0)/soil_class/soil_class.sh"
+    call_processing_func "$recipePath/soil_class/soil_class.sh"
     ;;
 
-  # NHM layers
+  # National Hydrology Model (NHM) static layers dataset
   "nhm" | "tgf" | "gf" )
-    call_processing_func "$(dirname $0)/nhm/nhm.sh"
+    call_processing_func "$recipePath/nhm/nhm.sh"
     ;;
 
   # dataset not included above

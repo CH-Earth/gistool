@@ -222,8 +222,9 @@ subset_geotiff () {
   gdal_translate --config GDAL_CACHEMAX 500 \
     -co COMPRESS="DEFLATE" \
     -co BIGTIFF="YES" \
+    -ot Byte \
     -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
-    -projwin_srs "$sourceProj4" \
+    -projwin_srs "$rasterProj4" \
     > /dev/null;
 }
 
@@ -260,7 +261,8 @@ extract_shapefile_extents () {
   local destProj4=$2
 
   # extract PROJ.4 string for $shapefilePath
-  sourceProj4=$(ogrinfo -al -so "$shapefilePath" | grep -e "PROJ.4" 2>/dev/null)
+  # sourceProj4=$(ogrinfo -al -so "$shapefilePath" | grep -e "PROJ.4" 2>/dev/null)
+  sourceProj4=$(ogrinfo -al -so "$shapefilePath" | grep "PROJ\.4" | awk -F': ' '{print $2}')
 
   # if $sourceProj4 is missing, assign EPSG:4326 as default value and warn
   if [[ -z "$sourceProj4" ]]; then
@@ -276,9 +278,12 @@ extract_shapefile_extents () {
     tempShapefile="${cache}/temp_reprojected.shp"
 
     # reproject ESRI shapefile to $destProj4
-    ogr2ogr -f "ESRI Shapefile" "${tempShapefile}" "${shapefilePath}" -s_srs \
-      "$sourceProj4" -t_srs "$destProj4" 2>"${outputDir}/misc.log"
+    ogr2ogr \
+      -s_srs "$sourceProj4" \
+      -t_srs "$destProj4" \
+      "${tempShapefile}" "${shapefilePath}";
 
+      #-f "ESRI Shapefile" \
     # assign the path of the projected file as the $shapefilePath
     shapefilePath="${tempShapefile}"
   fi
@@ -378,7 +383,7 @@ done
 
 # extracting raster projection PROJ.4 string value
 tempTif="${cache}/${tiffs[0]}"
-rasterProj4="$(gdalsrsinfo "${tempTif}" | grep -e "PROJ.4" | cut -d ':' -f2)"
+rasterProj4=$(gdalsrsinfo -o proj4 "${tempTif}" | tr -d '[\n]')
 
 # if shapefile is provided extract the extents from it
 if [[ -n $shapefile ]]; then

@@ -365,6 +365,7 @@ declare -A funcArgs=([geotiffDir]="$geotiffDir" \
   [prefixStr]="$prefixStr" \
   [cluster]="$cluster" \
   [cache]="$cache" \
+  [libPath]="$(jq -r '.["lib-path"]' $cluster)" \
 )
 
 
@@ -379,7 +380,6 @@ function call_processing_func () {
   # local variables with assignment 
   local scriptName=$(basename $scriptFile | cut -d '.' -f 1)
   local logDir="$HOME/.gistool/${scriptName}_$(logDirDate)/"
-  local libPath="$(jq '.["lib-path"]' $cluster)"
 
   # local variable without assignment
   local script
@@ -453,15 +453,17 @@ function call_processing_func () {
        --arg "datasetDir" "${funcArgs[geotiffDir]}" \
        --arg "variable" "${funcArgs[variables]}" \
        --arg "outputDir" "${funcArgs[outputDir]}" \
-       --arg "timeScale" "${funcArgs[timeScale]}" \
+       --arg "startDate" "${funcArgs[startDate]}" \
+       --arg "endDate" "${funcArgs[endDate]}" \
        --arg "latLims" "${funcArgs[latLims]}" \
        --arg "lonLims" "${funcArgs[lonLims]}" \
        --arg "shapefile" "${funcArgs[shapefile]}" \
        --arg "prefix" "${funcArgs[prefixStr]}" \
        --arg "fid" "${funcArgs[fid]}" \
-       --arg "print-geotiff" "${funcArgs[printGeotiff]}" \
+       --arg "printGeotiff" "${funcArgs[printGeotiff]}" \
        --arg "stat" "${funcArgs[stats]}" \
-       --arg "include-na" "${funcArgs[includeNA]}" \
+       --arg "includeNA" "${funcArgs[includeNA]}" \
+       --arg "libPath" "${funcArgs[libPath]}" \
        --arg "quantile" "${funcArgs[quantiles]}" \
        --arg "cache" "${funcArgs[cache]}" \
       '$ARGS.named' \
@@ -527,8 +529,7 @@ function call_processing_func () {
     # choose applicable scheduler and submit the job
     case "${scheduler,,}" in 
       "slurm")
-        # sbatch --export=NONE ${jobScriptPath} ;;
-        : ;;
+        sbatch --export=NONE ${jobScriptPath} ;;
       "pbs")
         qsub ${jobScriptPath} ;;
       "lfs")

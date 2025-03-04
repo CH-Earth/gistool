@@ -284,12 +284,12 @@ if [[ "$stats" == *"quantile"* ]] && [[ -z $quantiles ]]; then
 fi
 
 # if account is not provided, use `rpp-kshook` as default
-if [[ -z $account ]]; then
-  account="rpp-kshook"
-  if [[ -z $parsable ]]; then
-    echo "$(basename $0): WARNING! --account not provided, using \`rpp-kshook\` by default."
-  fi
-fi
+#if [[ -z $account ]]; then
+#  account="rpp-kshook"
+#  if [[ -z $parsable ]]; then
+#    echo "$(basename $0): WARNING! --account not provided, using \`rpp-kshook\` by default."
+#  fi
+#fi
 
 # `--lib-path` needs a default value if not provided
 if [[ -z $libPath ]]; then
@@ -362,7 +362,6 @@ call_processing_func () {
 	#!/bin/bash
 	#SBATCH --cpus-per-task=4
 	#SBATCH --nodes=1
-	#SBATCH --account=$account
 	#SBATCH --time=04:00:00
 	#SBATCH --mem=16000MB
 	#SBATCH --job-name=GIS_${scriptName}

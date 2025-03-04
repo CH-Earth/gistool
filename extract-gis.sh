@@ -450,13 +450,19 @@ function call_processing_func () {
   jobScriptJSON="$(
     jq -n \
        --arg "scriptFile" "$scriptFile" \
-       --arg "datasetDir" "${funcArgs[datasetDir]}" \
+       --arg "datasetDir" "${funcArgs[geotiffDir]}" \
        --arg "variable" "${funcArgs[variables]}" \
        --arg "outputDir" "${funcArgs[outputDir]}" \
        --arg "timeScale" "${funcArgs[timeScale]}" \
        --arg "latLims" "${funcArgs[latLims]}" \
        --arg "lonLims" "${funcArgs[lonLims]}" \
+       --arg "shapefile" "${funcArgs[shapefile]}" \
        --arg "prefix" "${funcArgs[prefixStr]}" \
+       --arg "fid" "${funcArgs[fid]}" \
+       --arg "print-geotiff" "${funcArgs[printGeotiff]}" \
+       --arg "stat" "${funcArgs[stats]}" \
+       --arg "include-na" "${funcArgs[includeNA]}" \
+       --arg "quantile" "${funcArgs[quantiles]}" \
        --arg "cache" "${funcArgs[cache]}" \
       '$ARGS.named' \
     )"
@@ -521,7 +527,8 @@ function call_processing_func () {
     # choose applicable scheduler and submit the job
     case "${scheduler,,}" in 
       "slurm")
-        sbatch --export=NONE ${jobScriptPath} ;;
+        # sbatch --export=NONE ${jobScriptPath} ;;
+        : ;;
       "pbs")
         qsub ${jobScriptPath} ;;
       "lfs")

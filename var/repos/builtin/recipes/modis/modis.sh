@@ -119,26 +119,7 @@ shopt -s expand_aliases
 # necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
 renvPackagePath="${renvCache}/renv_1.1.1.tar.gz" # renv_1.1.1 source path
-
-
-# ==========================
-# Necessary Global Variables
-# ==========================
-# None
-
-
-# ===================
-# Necessary Functions
-# ===================
-# Modules below available on Compute Canada (CC) Graham Cluster Server
-load_core_modules () {
-    module load r
-    module load gdal
-    module load udunits
-    module load geos
-    module load proj
-}
-load_core_modules
+gistoolPath="$(dirname $0)/../../../../../" # gistool's path 
 
 
 # =================
@@ -194,11 +175,11 @@ subset_geotiff () {
 
   # subset based on lat/lon - flush to disk at 500MB
   GDAL_CACHEMAX=500
-  gdal_translate --config GDAL_CACHEMAX 500 \
-  		 -co COMPRESS="DEFLATE" \
-  		 -co BIGTIFF="YES" \
-       -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}" \
-		 > /dev/null;
+  gdal_translate \
+    --config GDAL_CACHEMAX 500 \
+    -co COMPRESS="DEFLATE" \
+    -co BIGTIFF="YES" \
+    -projwin $lonMin $latMax $lonMax $latMin "${sourceVrt}" "${destPath}"; 
 }
 
 
@@ -233,7 +214,7 @@ if [[ -n $shapefile ]]; then
     echo "$(logDate)$(basename $0): WARNING! Assuming WSG84 CRS for the input ESRI shapefile"
     sourceProj4=("PROJ.4" " +proj=longlat +datum=WGS84 +no_defs") # made an array for compatibility with the following statements
   fi
-  
+ 
   # transform limits and assing to variables
   IFS=' ' read -ra leftBottomLims <<< $(echo "${shapefileExtents[@]:1:2}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
   IFS=' ' read -ra rightTopLims <<< $(echo "${shapefileExtents[@]:4:5}" | gdaltransform -s_srs "${sourceProj4[1]}" -t_srs EPSG:4326 -output_xy)
@@ -283,9 +264,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   mkdir -p "$cache/r-virtual-env/"
   ## make R renv in $cache
   virtualEnvPath="$cache/r-virtual-env/"
-  cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
-  ## load necessary modules - excessive, mainly for clarification
-  load_core_modules
+  cp "${gistoolPath}/etc/renv/renv.lock" "$virtualEnvPath"
 
   for var in "${variables[@]}"; do
     # extract given stats for each variable
@@ -304,20 +283,20 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
       export R_LIBS_USER="$tempInstallPath"
 
       ## build renv and create stats
-      Rscript "$(dirname $0)/../assets/stats.R" \
-      	      "$tempInstallPath" \
-  	      "$exactextractrCache" \
-  	      "$renvPackagePath" \
-	      "$virtualEnvPath" \
-	      "$virtualEnvPath" \
-	      "${virtualEnvPath}/renv.lock" \
-	      "$rasterPath" \
-	      "$shapefile" \
-	      "$outputDir/${var}/${prefix}stats_${var}_${yr}.csv" \
-	      "$stats" \
-	      "$includeNA" \
-	      "$quantiles" \
-	      "$fid" >> "${outputDir}/${var}/${prefix}stats_${var}_${yr}.log" 2>&1;
+    Rscript "${gistoolPath}/etc/scripts/stats.R" \
+      "$tempInstallPath" \
+      "$exactextractrCache" \
+      "$renvPackagePath" \
+	    "$virtualEnvPath" \
+	    "$virtualEnvPath" \
+	    "${virtualEnvPath}/renv.lock" \
+	    "$rasterPath" \
+	    "$shapefile" \
+	    "$outputDir/${var}/${prefix}stats_${var}_${yr}.csv" \
+	    "$stats" \
+	    "$includeNA" \
+	    "$quantiles" \
+	    "$fid" >> "${outputDir}/${var}/${prefix}stats_${var}_${yr}.log" 2>&1;
     done
   done
 fi
@@ -325,8 +304,8 @@ fi
 # produce stats if required
 mkdir "$HOME/empty_dir" 
 echo "$(logDate)$(basename $0): deleting temporary files from $cache"
-rsync --quiet -aP --delete "$HOME/empty_dir/" "$cache"
-rm -r "$cache"
+#rsync --quiet -aP --delete "$HOME/empty_dir/" "$cache"
+#rm -r "$cache"
 echo "$(logDate)$(basename $0): temporary files from $cache are removed"
 echo "$(logDate)$(basename $0): results are produced under $outputDir"
 

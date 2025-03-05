@@ -123,6 +123,7 @@ shopt -s expand_aliases
 # necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
 renvPackagePath="${renvCache}/renv_1.1.1.tar.gz" # renv_1.1.1 source path
+gistoolPath="$(dirname $0)/../../../../../" # gistool's path 
 
 
 # ==========================
@@ -150,21 +151,6 @@ landcoverPrefix="land_cover_"
 
 # constant name for landcoverchange's
 landcoverchangeFile="land_change_2010v2_2015v2_30m_tif.zip"
-
-
-# ===================
-# Necessary Functions
-# ===================
-# Modules below available on Compute Canada (CC) Graham Cluster Server
-load_core_modules () {
-  module load r
-  module load p7zip
-  module load gdal
-  module load udunits
-  module load geos
-  module load proj
-}
-load_core_modules
 
 
 # =================
@@ -410,7 +396,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   mkdir -p "$cache/r-virtual-env/"
   ## make R renv in $cache
   virtualEnvPath="$cache/r-virtual-env/"
-  cp "$(dirname $0)/../assets/renv.lock" "$virtualEnvPath"
+  cp "${gistoolPath}/etc/renv/renv.lock" "$virtualEnvPath"
   ## load necessary modules - excessive, mainly for clarification
   load_core_modules
 
@@ -423,7 +409,7 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   for tif in "${tiffs[@]}"; do
     IFS='.' read -ra fileName <<< "$tif"
     ## build renv and create stats
-    Rscript "$(dirname $0)/../assets/stats.R" \
+    Rscript "${gistoolPath}/etc/scripts/stats.R" \
       "$tempInstallPath" \
       "$exactextractrCache" \
       "$renvPackagePath" \

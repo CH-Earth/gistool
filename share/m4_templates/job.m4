@@ -16,6 +16,7 @@ eval ${conf[scriptFile]} \
   --dataset-dir="${conf[datasetDir]}" \
   --variable="${conf[variable]}" \
   --output-dir="${conf[outputDir]}" \
+  --crs="${conf[crs]}" \
   --fid="${conf[fid]}" \
   --stat="${conf[stats]}" \
   --quantile="${conf[quantile]}" \

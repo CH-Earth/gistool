@@ -308,6 +308,12 @@ if [[ -z $fid ]] && [[ -n $stats  ]]; then
   fi
 fi
 
+# if no crs is entered, assign the default value of EPSG 4326
+if [[ -z $crs ]]; then
+  crs=4326
+fi
+
+
 #######################################
 # Create m4 variable definitions to be
 # used in m4 macro calls in CLI from 
@@ -450,6 +456,7 @@ function call_processing_func () {
   jobScriptJSON="$(
     jq -n \
        --arg "scriptFile" "$scriptFile" \
+       --arg "crs" "${funcArgs[crs]}" \
        --arg "datasetDir" "${funcArgs[geotiffDir]}" \
        --arg "variable" "${funcArgs[variables]}" \
        --arg "outputDir" "${funcArgs[outputDir]}" \
@@ -461,7 +468,7 @@ function call_processing_func () {
        --arg "prefix" "${funcArgs[prefixStr]}" \
        --arg "fid" "${funcArgs[fid]}" \
        --arg "printGeotiff" "${funcArgs[printGeotiff]}" \
-       --arg "stat" "${funcArgs[stats]}" \
+       --arg "stats" "${funcArgs[stats]}" \
        --arg "includeNA" "${funcArgs[includeNA]}" \
        --arg "libPath" "${funcArgs[libPath]}" \
        --arg "quantile" "${funcArgs[quantiles]}" \

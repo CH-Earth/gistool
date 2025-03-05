@@ -397,8 +397,6 @@ if [[ -n "$shapefile" ]] && [[ -n $stats ]]; then
   ## make R renv in $cache
   virtualEnvPath="$cache/r-virtual-env/"
   cp "${gistoolPath}/etc/renv/renv.lock" "$virtualEnvPath"
-  ## load necessary modules - excessive, mainly for clarification
-  load_core_modules
 
   ## make the temporary directory for installing r packages
   tempInstallPath="$cache/r-packages"

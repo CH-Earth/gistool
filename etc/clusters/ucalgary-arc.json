@@ -16,6 +16,7 @@
             "module -q purge"
         ],
         "compiler": "module -q load gcc/14.2.0",
+        "sqlite3": "module -q load sqlite/3.46.0",
         "r": "module -q load r/4.4.1",
         "7z": "module -q load p7zip/17.05",
         "gdal": "module -q load gdal/3.9.2",

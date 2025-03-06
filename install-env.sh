@@ -20,17 +20,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # main help function
-usage () {
+usage() {
   echo "Prepare environment for GISTOOL
 
 Usage:
-  install-env.sh HPCJSON [INSTALL_PATH]
+  install-env.sh -j HPCJSON [-p INSTALL_PATH] [-h]
 
-Script arguments:
-  HPCJSON             The JSON file describing the target HPC system
-  INSTALL_PATH        The installation path for the environment required
-                      for the tool, 
-                        [defaults to \$HOME/.local/R/exact-extract-renv]
+Options:
+  -j HPCJSON       The JSON file describing the target HPC system (required)
+  -p INSTALL_PATH  The installation path for the environment required
+                   for the tool [default: \$HOME/.local/R/exact-extract-renv]
+  -h               Show this help message and exit
 
 For bug reports, questions, and discussions open an issue
 at https://github.com/CH-Earth/gistool/issues" >&1;
@@ -38,69 +38,104 @@ at https://github.com/CH-Earth/gistool/issues" >&1;
   exit 0;
 }
 
-# input arguments
-cluster_json="$1"
-install_path="$2"
+# Initialize variables
+cluster_json=""
+install_path="${HOME}/.local/R/exact-extract-renv"
 
-# check whether JSON arguments is provided
+# Parse command-line options
+while getopts ":j:p:h" opt; do
+  case ${opt} in
+    j)
+      cluster_json="$OPTARG"
+      ;;
+    p)
+      install_path="$OPTARG"
+      ;;
+    h)
+      usage
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      usage
+      ;;
+  esac
+done
+
+# Check whether JSON argument is provided
 if [[ -z "$cluster_json" ]]; then
-  echo "$(basename $0): ERROR! HPC-specific JSON file missing"
-  exit 1;
+  echo "$(basename $0): ERROR! HPC-specific JSON file missing" >&2
+  usage
 fi
 
-# if $install_path is not provided, use default path
-if [[ -n "$install_path" ]]; then
-  install_path="${HOME}/.local/R/exact-extract-r/"
-fi
-
-# verbosity
+# Verbosity
 echo "$(basename $0): Installing in $install_path"
 
-# create install directories
-mkdir -p $HOME/.local/R/library/
-mkdir -p $install_path 
-mkdir -p $HOME/.local/R/renv-env/
+# Create install directories
+mkdir -p "$HOME/.local/R/library/"
+mkdir -p "$install_path"
+mkdir -p "$HOME/.local/R/renv-env/"
 
-# assign relevant environment variables
-export R_LIBS_USER=$HOME/.local/R/library
-export R_LIBS_SITE=$HOME/.local/R/library
-export RENV_PATHS_CACHE=$install_path
+# Assign relevant environment variables
+export R_LIBS_USER="$HOME/.local/R/library"
+export R_LIBS_SITE="$HOME/.local/R/library"
+export RENV_PATHS_CACHE="$install_path"
 
-# find sqlite3 library path
+# Find sqlite3 library path
 export sqlite3_lib_path="$(pkgconf --variable=libdir sqlite3)"
+if [[ -z "$sqlite3_lib_path" ]]; then
+  echo "$(basename $0): ERROR! sqlite3 library path could not be determined" >&2
+  exit 1
+fi
 echo "Sqlite3 library path is set to $sqlite3_lib_path"
 
-# copy necessary renv.lock file from the tools repository
-cp "$(dirname $0)/etc/renv/renv.lock" $HOME/.local/R/renv-env/
-
-# download `renv` package from R's CRAN repository
-# hardcoded to version 1.1.1
-wget \
-  -P "${RENV_PATHS_CACHE}" \
-  "https://cran.r-project.org/src/contrib/Archive/renv/renv_1.1.1.tar.gz"
-
-# change to the install_path (or renv's cache path)
-cd "$RENV_PATHS_CACHE"
-
-# install `renv_v1.1.1`
-Rscript -e 'install.packages("renv_1.1.1.tar.gz", repos=NULL, type="source", quiet=TRUE, lib=Sys.getenv("R_LIBS_USER")[1]);'
-
-# change to the local renv directory
-cd "${HOME}/.local/R/renv-env/"
-
-# install relevant packages
-# first activate the enviornment for the first time
-Rscript -e 'renv::activate();'
-# reactivate and restore the `renv.lock` file
-Rscript -e 'renv::activate(); renv::restore(prompt=FALSE); renv::isolate()'
-# trap the exit code
-exit_code=$?
-# make an renv::isolate
-Rscript -e 'renv::isolate()'
-
-# if the `exit_code=0`, then print a success message
-if [[ "$exit_code" -eq 0 ]]; then
-  echo "$(basename $0): Enviornment successfully set up in $install_path"
+# Copy necessary renv.lock file from the tools repository
+if ! cp "$(dirname $0)/etc/renv/renv.lock" "$HOME/.local/R/renv-env/"; then
+  echo "$(basename $0): ERROR! Failed to copy renv.lock file" >&2
+  exit 1
 fi
 
-exit 0;
+# Download `renv` package from R's CRAN repository
+# Hardcoded to version 1.1.1
+if ! wget -P "${RENV_PATHS_CACHE}" "https://cran.r-project.org/src/contrib/Archive/renv/renv_1.1.1.tar.gz"; then
+  echo "$(basename $0): ERROR! Failed to download renv package" >&2
+  exit 1
+fi
+
+# Change to the install_path (or renv's cache path)
+cd "$RENV_PATHS_CACHE" || { echo "$(basename $0): ERROR! Failed to change directory to $RENV_PATHS_CACHE" >&2; exit 1; }
+
+# Install `renv_v1.1.1`
+if ! Rscript -e 'install.packages("renv_1.1.1.tar.gz", repos=NULL, type="source", quiet=TRUE, lib=Sys.getenv("R_LIBS_USER")[1]);'; then
+  echo "$(basename $0): ERROR! Failed to install renv package" >&2
+  exit 1
+fi
+
+# Change to the local renv directory
+cd "${HOME}/.local/R/renv-env/" || { echo "$(basename $0): ERROR! Failed to change directory to ${HOME}/.local/R/renv-env/" >&2; exit 1; }
+
+# Install relevant packages
+# First activate the environment for the first time
+if ! Rscript -e 'renv::activate();'; then
+  echo "$(basename $0): ERROR! Failed to activate renv environment" >&2
+  exit 1
+fi
+
+# Reactivate and restore the `renv.lock` file
+if ! Rscript -e 'renv::activate(); renv::restore(prompt=FALSE); renv::isolate()'; then
+  echo "$(basename $0): ERROR! Failed to restore renv environment" >&2
+  exit 1
+fi
+
+# Trap the exit code
+exit_code=$?
+
+# If the `exit_code=0`, then print a success message
+if [[ "$exit_code" -eq 0 ]]; then
+  echo "$(basename $0): Environment successfully set up in $install_path"
+fi
+
+exit $exit_code

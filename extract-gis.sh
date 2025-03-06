@@ -63,7 +63,7 @@ Script options:
                                    to HPC's scheduler; optional
   -t, --print-geotiff=BOOL         Extract the subsetted GeoTIFF file; optional
                                    [defaults to 'true']
-  -a, --stat=stat1[,stat2[...]]		 If applicable, extract the statistics of
+  -a, --stat=stat1[,stat2[...]]    If applicable, extract the statistics of
                                    interest, currently available options are:
                                    'min';'max';'mean';'majority';'minority';
                                    'median';'quantile';'variety';'variance';

@@ -93,7 +93,7 @@ during the environment setup. This step is crucial for ensuring
 compatibility and proper functionality of Gistool on your cluster.
 
 The ``./etc/clusters/`` directory contains example 
-`JSON configuration files <file:///json.rst>`_
+:doc:`JSON configuration files <json>`
 that describe various HPC systems. These files can serve as
 templates for creating your own cluster-specific JSON configuration.
 

@@ -1,13 +1,13 @@
 JSON Configuration File for HPC Module Systems
 ==============================================
-This JSON file provides the configuration specifications for running ``datatool``
+This JSON file provides the configuration specifications for running ``gistool``
 on any High-Performance Computing (HPC) system. It primarily describes the
 scheduler, "unit" job specifications, and module systems required for successful
 execution of the subset extraction process.
 
 General View
 ------------
-Below is an example of the ``JSON`` file that can be fed to ``datatool``
+Below is an example of the ``JSON`` file that can be fed to ``gistool``
 using the ``--cluster`` option.
 
 .. code-block:: json
@@ -29,14 +29,16 @@ using the ``--cluster`` option.
                 "module use /work/comphyd_lab/local/modules/spack/2024v5/modules/linux-rocky8-x86_64/Core/",
                 "module -q purge"
             ],
-            "stdenv": "",
             "compiler": "module -q load gcc/14.2.0",
-            "mpi": "module -q load mpi-serial/2.5.0",
+            "sqlite3": "module -q load sqlite/3.46.0",
+            "r": "module -q load r/4.4.1",
+            "7z": "module -q load p7zip/17.05",
             "gdal": "module -q load gdal/3.9.2",
-            "cdo": "module -q load cdo/2.4.3",
-            "nco": "module -q load nco/5.2.4",
-            "ncl": "module -q load ncl-mpi-serial/6.6.2"
-        }
+            "udunits": "module -q load udunits/2.2.28",
+            "geos": "module -q load geos/3.12.2",
+            "proj": "module -q load proj/9.4.1"
+        },
+        "lib-path": "/work/comphyd_lab/envs/r-env/"
     }
 
 
@@ -116,29 +118,33 @@ Details
   This section defines the module system setup and required software.
   Please note that all arguments are optional and should be entered at the
   discretion of the end-user:
-  
-    .. list-table::
-       :header-rows: 1
-       :widths: 15 85
 
-       * - Module
-         - Description
-       * - ``init``
-         - List of initialization commands for the module system
-       * - ``stdenv``
-         - Placeholder for standard environment modules
-       * - ``compiler``
-         - Loads the compiler (e.g., ``module -q load gcc/14.2.0``)
-       * - ``mpi``
-         - Loads the MPI implementation (e.g., ``module -q load mpi-serial/2.5.0``)
-       * - ``gdal``
-         - Loads GDAL library for geospatial data processing (e.g., ``module -q load gdal/3.9.2``)
-       * - ``cdo``
-         - Loads CDO library for climate data operators (e.g., ``module -q load cdo/2.4.3``)
-       * - ``nco``
-         - Loads NCO library for netCDF operations (e.g., ``module -q load nco/5.2.4``)
-       * - ``ncl``
-         - Loads NCL library for data visualization and processing (e.g., ``module -q load ncl-mpi-serial/6.6.2``)
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 85
+
+   * - Module
+     - Description
+   * - ``init``
+     - List of initialization commands for the module system.
+   * - ``compiler``
+     - Loads the compiler (e.g., ``module -q load gcc/14.2.0``)
+   * - ``sqlite3``
+     - Loads SQLite library (e.g., ``module -q load sqlite/3.46.0``)
+   * - ``r``
+     - Loads R programming language (e.g., ``module -q load r/4.4.1``)
+   * - ``7z``
+     - Loads 7-Zip compression tool (e.g., ``module -q load p7zip/17.05``)
+   * - ``gdal``
+     - Loads GDAL library for geospatial data processing (e.g., ``module -q load gdal/3.9.2``)
+   * - ``udunits``
+     - Loads UDUNITS library for unit conversions (e.g., ``module -q load udunits/2.2.28``)
+   * - ``geos``
+     - Loads GEOS library for geometric operations (e.g., ``module -q load geos/3.12.2``)
+   * - ``proj``
+     - Loads PROJ library for cartographic projections (e.g., ``module -q load proj/9.4.1``)
+
 
 .. note::
 
@@ -150,7 +156,7 @@ Usage
 -----
 
 This configuration file ensures that all necessary software and environment
-settings are loaded before running ``datatool`` on an HPC system. Customize
+settings are loaded before running ``gistool`` on an HPC system. Customize
 the fields (e.g., ``account`` or ``partition``) based on your specific HPC setup.
 
 Predefined HPC Configurations
@@ -179,3 +185,40 @@ the path to each. For instance by using
 ``--cluster=./etc/clusters/drac-graham.json``, the tool uses the
 pre-defined configuration file of the ``Digital Research Alliance of
 Canada``'s ``Graham`` cluster to execute subset extraction processes.
+
+
+Explanation of ``lib-path``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``lib-path`` in the provided JSON file specifies the directory
+where the R environment and its associated libraries are installed.
+This path is crucial because it tells the system where to find the
+necessary libraries and dependencies required for running R scripts
+and related tools. In this case, the ``lib-path`` is set to
+``/work/comphyd_lab/envs/r-env/``, indicating that all the R libraries
+and dependencies are located in this directory.
+
+Workflow to Build the Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To build the R environment and set up the necessary libraries, you can
+use the ``install-env.sh`` script available in the repository. This
+script automates the process of installing the required R packages
+and dependencies in the specified ``lib-path``.
+
+1. **Clone the Repository**: First, clone the repository that contains 
+the ``install-env.sh`` script.
+2. **Run the Script**: Execute the ``install-env.sh`` script, which will
+install the R environment and all necessary libraries in the directory
+specified by ``lib-path``.
+
+Further Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+For more detailed instructions on how to specify the installation path
+in the cluster JSON and how to run the ``install-env.sh`` script, refer to
+:doc:`quick_start`.
+
+This section will guide you through the process of configuring the
+``lib-path`` and running the installation script to set up your R environment
+correctly.

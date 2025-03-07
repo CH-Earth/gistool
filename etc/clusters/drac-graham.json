@@ -14,7 +14,7 @@
             "module -q load StdEnv/2023"
         ],
         "compiler": "module -q load gcc/12.3",
-	"sqlite3": "",
+        "sqlite3": "",
         "r": "module -q load r/4.4.0",
         "7z": "",
         "gdal": "module -q load gdal/3.9.1",

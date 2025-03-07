@@ -71,6 +71,28 @@ if [[ -z "$cluster_json" ]]; then
   usage
 fi
 
+# Extract and source the "init" commands
+echo "Executing init commands..."
+while read -r command; do
+    if [[ -n "$command" ]]; then
+        echo "Sourcing: $command"
+        source <(echo "$command")
+    else
+        echo "Warning: Empty command in init section."
+    fi
+done < <(jq -r '.modules.init[]' "$cluster_json")
+
+# Extract and source the module load commands (excluding "init")
+echo "Loading modules..."
+while read -r command; do
+    if [[ -n "$command" ]]; then
+        echo "Sourcing: $command"
+        source <(echo "$command")
+    else
+        echo "Warning: Empty command in modules section."
+    fi
+done < <(jq -r '.modules | to_entries[] | select(.key != "init") | .value' "$cluster_json")
+
 # Verbosity
 echo "$(basename $0): Installing in $install_path"
 

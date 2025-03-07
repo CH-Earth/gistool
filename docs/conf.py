@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'datatool'
-copyright = '2022-2024, University of Calgary'
+project = 'gistool'
+copyright = '2022-2025, University of Calgary'
 author = 'Kasra Keshavarz'
-release = '0.7.0'
+release = '0.7.0-dev'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

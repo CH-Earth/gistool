@@ -1,19 +1,19 @@
-.. Copyright 2022-2024 University of Calgary, University of Saskatchewan
-   and other datatool Developers.
+.. Copyright 2022-2025 University of Calgary, University of Saskatchewan
+   and other gistool Developers.
 
    SPDX-License-Identifier: (GPL-3.0-or-later)
 
-.. _main-datatool:
+.. _main-gistool:
 
 ========================================
-Welcome to ``datatool``'s documentation!
+Welcome to ``gistool``'s documentation!
 ========================================
-``datatool`` is an HPC-indepenent workflow enabling end-users extracting
-subsets from community meteorological datasets through a simple
-command-line interface (CLI). The tool works at large with NetCDF files,
+``gistool`` is an HPC-indepenent workflow enabling end-users extracting
+subsets from community geospatial datasets through a simple
+command-line interface (CLI). The tool works at large with geospatial files,
 but is not limited to any file format, structure, or dataset.
 
-Through crowsourcing, ``datatool`` aims to enable end-users extract subsets
+Through crowsourcing, ``gistool`` aims to enable end-users extract subsets
 from any dataset available to the community members.
 
 --------------
@@ -25,45 +25,53 @@ is as follows:
 
 .. code-block:: console
 
-   Usage:
-     extract-dataset [options...]
-
-   Script options:
-     -d, --dataset                     Meteorological forcing dataset of interest
-     -i, --dataset-dir=DIR             The source path of the dataset file(s)
-     -v, --variable=var1[,var2[...]]   Variables to process
-     -o, --output-dir=DIR              Writes processed files to DIR
-     -s, --start-date=DATE             The start date of the data
-     -e, --end-date=DATE               The end date of the data
-     -l, --lat-lims=REAL,REAL          Latitude's upper and lower bounds
-                                       optional; within the [-90, +90] limits
-     -n, --lon-lims=REAL,REAL          Longitude's upper and lower bounds
-                                       optional; within the [-180, +180] limits
-     -a, --shape-file=PATH             Path to the ESRI shapefile; optional
-     -m, --ensemble=ens1,[ens2,[...]]  Ensemble members to process; optional
-                                       Leave empty to extract all ensemble members
-     -M, --model=model1,[model2,[...]] Models that are part of a dataset,
-                                       only applicable to climate datasets, optional
-     -S, --scenario=scn1,[scn2,[...]]  Climate scenarios to process, only applicable
-                                       to climate datasets, optional
-     -j, --submit-job                  Submit the data extraction process as a job
-                                       on the SLURM system; optional
-     -k, --no-chunk                    No parallelization, recommended for small domains
-     -p, --prefix=STR                  Prefix prepended to the output files
-     -b, --parsable                    Parsable SLURM message mainly used
+    Usage:
+      extract-gis [options...]
+    
+    Script options:
+      -d, --dataset                    Geospatial dataset of interest
+      -i, --dataset-dir=DIR            The source path of the dataset file(s)
+      -r, --crs=INT                    The EPSG code of interest; optional
+                                       [defaults to 4326]
+      -v, --variable=var1[,var2[...]]  If applicable, variables to process
+      -o, --output-dir=DIR             Writes processed files to DIR
+      -s, --start-date=DATE            If applicable, start date of the geospatial
+                                       data; optional
+      -e, --end-date=DATE              If applicable, end date of the geospatial
+                                       data; optional
+      -l, --lat-lims=REAL,REAL         Latitude's upper and lower bounds; optional
+      -n, --lon-lims=REAL,REAL         Longitude's upper and lower bounds; optional
+      -f, --shape-file=PATH            Path to the ESRI '.shp' file; optional
+      -F, --fid=STR                    Column name representing elements of the
+                                       Polygons to report statistics; optional
+                                       [defaults to the first column]
+      -j, --submit-job                 Submit the data extraction process as a job
+                                       to HPC's scheduler; optional
+      -t, --print-geotiff=BOOL         Extract the subsetted GeoTIFF file; optional
+                                       [defaults to 'true']
+      -a, --stat=stat1[,stat2[...]]    If applicable, extract the statistics of
+                                       interest, currently available options are:
+                                       'min';'max';'mean';'majority';'minority';
+                                       'median';'quantile';'variety';'variance';
+                                       'stdev';'coefficient_of_variation';'frac';
+                                       'coords'; 'count'; 'sum'; optional
+      -U, --include-na                 Include NA values in generated
+                                       statistics, optional 
+      -q, --quantile=q1[,q2[...]]      Quantiles of interest to be produced if 'quantile'
+                                       is included in the '--stat' argument. The values
+                                       must be comma delimited float numbers between
+                                       0 and 1; optional [defaults to every 5th quantile]
+      -p, --prefix=STR                 Prefix  prepended to the output files
+      -b, --parsable                   Parsable SLURM message mainly used
                                        for chained job submissions
-     -c, --cache=DIR                   Path of the cache directory; optional
-                                       defaults to $HOME/scratch
-     -E, --email=user@example.com      E-mail user when job starts, ends, or
-                                       fails; optional
-     -C, --cluster=JSON                JSON file detailing cluster-specific details
-     -L, --list-datasets               List all the available datasets and the
-                                       corresponding keywords for '--dataset' option
-     -V, --version                     Show version
-     -h, --help                        Show this screen and exit
+      -c, --cache=DIR                  Path of the cache directory; optional
+      -E, --email=STR                  E-mail when job starts, ends, and fails; optional
+      -C, --cluster=JSON                JSON file detailing cluster-specific details
+      -V, --version                    Show version
+      -h, --help                       Show this screen and exit
 
 
-Use the navigation menu on the left to explore the ``datatool``'s
+Use the navigation menu on the left to explore the ``gistool``'s
 documentation!
 
 .. toctree::

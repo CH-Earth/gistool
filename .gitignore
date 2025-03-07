@@ -3,3 +3,9 @@
 .ipynb_checkpoints
 .DS_Store
 *.swp
+
+# test folders
+ignore-tests/
+
+# docs stuff
+docs/build/

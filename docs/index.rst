@@ -16,6 +16,30 @@ but is not limited to any file format, structure, or dataset.
 Through crowsourcing, ``gistool`` aims to enable end-users extract subsets
 from any dataset available to the community members.
 
+------------
+Dependencies
+------------
+
+The tool requires several basic dependencies to function properly. Below is
+a list of the minimum versions required for each dependency:
+
+- **jq**: Version 1.6 or higher
+- **m4**: Version 1.4.18 or higher
+- **gdal**: Version 3.9.1 or higher
+- **hdf**: Version 4.2.16 or higher
+- **r**: Version 4.4.1 or higher
+- **udunits**: Version 2.2.28 or higher
+- **geos**: Version 3.12.0 or higher
+- **proj**: Version 9.2.0 or higher
+- **(p)7zip**: Version 16.02 or higher
+- **getopt**: Version 2.38.1 or higher
+- **getopts**: Version 4.2 or higher
+- **bash**: Version 5 or higher
+
+These dependencies are essential for the tool to operate correctly. Ensure
+that all dependencies are installed and meet the minimum version
+requirements before using the tool.
+
 --------------
 User Interface
 --------------

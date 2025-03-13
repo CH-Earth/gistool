@@ -118,6 +118,7 @@ shopt -s expand_aliases
 # necessary hard-coded paths
 exactextractrCache="${renvCache}/exact-extract-env" # exactextractr renv cache path
 renvPackagePath="${renvCache}/renv_1.1.1.tar.gz" # renv_1.1.1 source path
+gistoolPath="$(dirname $0)/../../../../../" # gistool's path 
 
 
 # ==========================

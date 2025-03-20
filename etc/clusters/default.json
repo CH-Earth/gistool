@@ -1,0 +1,24 @@
+{
+    "scheduler": "slurm",
+    "specs": {
+        "cpus": 1,
+        "time": "04:00:00",
+        "nodes": 1,
+        "partition": "default",
+        "account": "",
+        "mem": "8000M"
+    },
+    "modules": {
+        "init": [
+        ],
+        "compiler": "module load gcc",
+        "sqlite3": "module load sqlite",
+        "r": "module load r",
+        "7z": "",
+        "gdal": "module load gdal",
+        "udunits": "module load udunits",
+        "geos": "module load geos",
+        "proj": "module load proj"
+    },
+    "lib-path": "$HOME/.local/R/exact-extract-r/"
+}

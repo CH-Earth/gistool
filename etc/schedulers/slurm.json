@@ -1,0 +1,5 @@
+{
+    "environment_variables": {
+        "job_id": "SLURM_JOB_ID"
+    }
+}

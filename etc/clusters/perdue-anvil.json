@@ -1,0 +1,25 @@
+{
+    "scheduler": "slurm",
+    "specs": {
+        "cpus": 1,
+        "time": "01:00:00",
+        "nodes": 1,
+        "partition": "",
+        "account": "ees240082",
+        "mem": "4000M"
+    },
+    "modules": {
+        "init": [
+        ],
+        "stdenv": "",
+        "compiler": "module -q load gcc/11.2.0",
+        "sqlite3": "module -q load sqlite/3.35.5",
+        "r": "module -q load r/4.4.1",
+        "7z": "",
+        "gdal": "module -q load gdal/3.2.0",
+        "udunits": "module -q load udunits/2.2.28",
+        "geos": "module -q load geos/3.9.1",
+        "proj": "module -q load proj/6.2.0"
+    },
+    "lib-path": "/anvil/projects/x-ees240082/envs/r-env"
+}

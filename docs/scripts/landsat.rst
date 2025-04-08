@@ -8,20 +8,24 @@ Location of the ``Landsat`` Dataset Files
 -----------------------------------------
 
 The ``LandSat`` geospatial dataset files are located under the following
-directory accessible from Digital Alliance (formerly Compute Canada)
-Graham cluster:
+directory accessible from multiple clusters:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/Landsat/ # DRAC Graham's rpp-kshook allocation
-   /work/comphyd_lab/data/geospatial-data/Landsat # University of Calgary's ARC comphyd_lab allocation
+   # DRAC Graham HPC location
+   /project/rpp-kshook/Model_Output/Landsat/ #rpp-kshook allocation
+
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/Landsat #comphyd_lab allocation
+
+   # Perdue University Anvil HPC location
    /anvil/datasets/geospatial/NALCMS # Perdue University's Anvil cluster
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/Landsat/
+   /path/to/dataset/dir/
    ├── land_change_2010v2_2015v2_30m_tif.zip
    ├── land_cover_2005v3_250m_tif.zip
    ├── land_cover_2010v2_250m_tif.zip
@@ -80,66 +84,56 @@ Land Cover Types
 Below the land cover types for each values of the ``.tif`` files is
 detailed based on [1].
 
-+---+--------------------+---------------------------------+-----------+
-| # | Class Value (used  | Land Cover Description          | RGB Value |
-|   | in ``gistool``)    |                                 |           |
-+===+====================+=================================+===========+
-| 1 | 1                  | Temperate or sub-polar          | RGB (0,   |
-|   |                    | needleleaf forest               | 61, 0)    |
-+---+--------------------+---------------------------------+-----------+
-| 2 | 2                  | Sub-polar taiga needleleaf      | RGB (148, |
-|   |                    | forest                          | 156, 112) |
-+---+--------------------+---------------------------------+-----------+
-| 3 | 3                  | Tropical or sub-tropical        | RGB (0,   |
-|   |                    | broadleaf evergreen forest      | 99, 0)    |
-+---+--------------------+---------------------------------+-----------+
-| 4 | 4                  | Tropical or sub-tropical        | RGB (30,  |
-|   |                    | broadleaf deciduous forest      | 171, 5)   |
-+---+--------------------+---------------------------------+-----------+
-| 5 | 5                  | Temperate or sub-polar          | RGB (20,  |
-|   |                    | broadleaf deciduous forest      | 140, 61)  |
-+---+--------------------+---------------------------------+-----------+
-| 6 | 6                  | Mixed forest                    | RGB (92,  |
-|   |                    |                                 | 117, 43)  |
-+---+--------------------+---------------------------------+-----------+
-| 7 | 7                  | Tropical or sub-tropical        | RGB (179, |
-|   |                    | shrubland                       | 158, 43)  |
-+---+--------------------+---------------------------------+-----------+
-| 8 | 8                  | Temperate or sub-polar          | RGB (179, |
-|   |                    | shrubland                       | 138, 51)  |
-+---+--------------------+---------------------------------+-----------+
-| 9 | 9                  | Tropical or sub-tropical        | RGB (232, |
-|   |                    | grassland                       | 220, 94)  |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 10                 | Temperate or sub-polar          | RGB (225, |
-| 0 |                    | grassland                       | 207, 138) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 11                 | Sub-polar or polar              | RGB (156, |
-| 1 |                    | shrubland-lichen-moss           | 117, 84)  |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 12                 | Sub-polar or polar              | RGB (186, |
-| 2 |                    | grassland-lichen-moss           | 212, 143) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 13                 | Sub-polar or polar              | RGB (64,  |
-| 3 |                    | barren-lichen-moss              | 138, 112) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 14                 | Wetland                         | RGB (107, |
-| 4 |                    |                                 | 163, 138) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 15                 | Cropland                        | RGB (230, |
-| 5 |                    |                                 | 174, 102) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 16                 | Barren lands                    | RGB (168, |
-| 6 |                    |                                 | 171, 174) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 17                 | Urban                           | RGB (220, |
-| 7 |                    |                                 | 33, 38)   |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 18                 | Water                           | RGB (76,  |
-| 8 |                    |                                 | 112, 163) |
-+---+--------------------+---------------------------------+-----------+
-| 1 | 19                 | Snow and ice                    | RGB (255, |
-| 9 |                    |                                 | 250, 255) |
++----+--------------------+---------------------------------+-----------+
+| #  | Class Value (used  | Land Cover Description          | RGB Value |
+|    | in ``gistool``)    |                                 |           |
++====+====================+=================================+===========+
+| 1  | 1                  | Temperate or sub-polar          | RGB (0,   |
+|    |                    | needleleaf forest               | 61, 0)    |
++----+--------------------+---------------------------------+-----------+
+| 2  | 2                  | Sub-polar taiga needleleaf      | RGB (148, |
+|    |                    | forest                          | 156, 112) |
++----+--------------------+---------------------------------+-----------+
+| 3  | 3                  | Tropical or sub-tropical        | RGB (0,   |
+|    |                    | broadleaf evergreen forest      | 99, 0)    |
++----+--------------------+---------------------------------+-----------+
+| 4  | 4                  | Tropical or sub-tropical        | RGB (30,  |
+|    |                    | broadleaf deciduous forest      | 171, 5)   |
++----+--------------------+---------------------------------+-----------+
+| 5  | 5                  | Temperate or sub-polar          | RGB (20,  |
+|    |                    | broadleaf deciduous forest      | 140, 61)  |
++----+--------------------+---------------------------------+-----------+
+| 6  | 6                  | Mixed forest                    | RGB (92,  |
+|    |                    |                                 | 117, 43)  |
++----+--------------------+---------------------------------+-----------+
+| 7  | 7                  | Tropical or sub-tropical        | RGB (179, |
+|    |                    | shrubland                       | 158, 43)  |
++----+--------------------+---------------------------------+-----------+
+| 8  | 8                  | Temperate or sub-polar          | RGB (179, |
+|    |                    | shrubland                       | 138, 51)  |
++----+--------------------+---------------------------------+-----------+
+| 9  | 9                  | Tropical or sub-tropical        | RGB (232, |
+|    |                    | grassland                       | 220, 94)  |
++----+--------------------+---------------------------------+-----------+
+| 10 | 10                 | Temperate or sub-polar          | RGB (225, |
++----+--------------------+---------------------------------+-----------+
+| 11 | 11                 | Sub-polar or polar              | RGB (156, |
++----+--------------------+---------------------------------+-----------+
+| 12 | 12                 | Sub-polar or polar              | RGB (186, |
++----+--------------------+---------------------------------+-----------+
+| 13 | 13                 | Sub-polar or polar              | RGB (64,  |
++----+--------------------+---------------------------------+-----------+
+| 14 | 14                 | Wetland                         | RGB (107, |
++----+--------------------+---------------------------------+-----------+
+| 15 | 15                 | Cropland                        | RGB (230, |
++----+--------------------+---------------------------------+-----------+
+| 16 | 16                 | Barren lands                    | RGB (168, |
++----+--------------------+---------------------------------+-----------+
+| 17 | 17                 | Urban                           | RGB (220, |
++----+--------------------+---------------------------------+-----------+
+| 18 | 18                 | Water                           | RGB (76,  |
++----+--------------------+---------------------------------+-----------+
+| 19 | 19                 | Snow and ice                    | RGB (255, |
 +---+--------------------+---------------------------------+-----------+
 
 Also, the details of the above table has been included in the following
@@ -152,7 +146,7 @@ The following file contains the following GeoTIFF data:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/Landsat/land_change_2010v2_2015v2_30m_tif.zip
+   /path/to/dataset/dir/land_change_2010v2_2015v2_30m_tif.zip
    ├── NA_NALCMS_2010v2_2015v2_30m_barren_land_loss_and_gain.tif
    ├── NA_NALCMS_2010v2_2015v2_30m_cropland_loss_and_gain.tif
    ├── NA_NALCMS_2010v2_2015v2_30m_forest_loss_and_gain.tif

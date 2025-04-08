@@ -8,13 +8,12 @@ Location of the ``GSDE`` Dataset Files
 --------------------------------------
 
 The ``GSDE`` geospatial dataset files are located under the following
-directory accessible from Digital Alliance (formerly Compute Canada)
-Graham cluster:
+directory accessible from multiple clusters:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/GSDE/download/gsde-30sec/ # Graham's rpp-kshook allocation
-
+   # DRAC Graham HPC location
+   /project/rpp-kshook/Model_Output/GSDE/download/gsde-30sec/ # rpp-kshook allocation
 
 And the structure of the files is as following:
 

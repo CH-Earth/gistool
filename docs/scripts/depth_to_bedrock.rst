@@ -8,20 +8,21 @@ Location of the ``Global Depth to Bedrock`` Dataset Files
 ---------------------------------------------------------
 
 The ``Global Depth to Bedrock`` geospatial dataset files are located
-under the following directory accessible from Digital Alliance (formerly
-Compute Canada) Graham cluster:
+under the following directory accessible from multiple clusters:
 
 .. code:: console
 
+   # DRAC Graham HPC location
    /project/rpp-kshook/Model_Output/DTB # Graham's rpp-kshook allocation
-   /work/comphyd_lab/data/geospatial-data/DTB # University of Calgary's ARC comphyd_lab allocation
 
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/DTB # comphyd_lab allocation
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/DTB
+   /path/to/dataset/dir/DTB
    ├── BDRICM_M_10km_ll.zip
    ├── BDRICM_M_1km_ll.zip
    ├── BDRICM_M_250m_ll.zip

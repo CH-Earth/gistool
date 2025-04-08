@@ -8,18 +8,24 @@ Location of the ``Soil Grids V1`` Dataset Files
 -----------------------------------------------
 
 The ``Soil Grids V1`` geospatial dataset files are located under the
-following directory accessible from Digital Alliance (formerly Compute
-Canada) Graham cluster:
+following directory accessible from multiple clusters:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/SoilGridsV1/soilgrids/former/2017-03-10/data
+   # DRAC Graham HPC location
+   /project/rpp-kshook/Model_Output/SoilGridsV1/soilgrids/former/2017-03-10/data # rpp-kshook allocation
+
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/SoilGridsV1/soilgrids/former/2017-03-10/data # comphyd_lab allocation
+
+   # Perdue University Anvil HPC location
+   /anvil/datasets/geospatial/Soil_Grids_v1/soilgrids/former/2017-03-10/data # Anvil community storage
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/SoilGridsV1/soilgrids/former/2017-03-10/data
+   /path/to/dataset/dir/
    ├── ACDWRB_M_ss_250m_ll.tif 
    ├── ACDWRB_M_ss_250m_ll.tif.xml
    ├── AWCh1_M_sl1_250m_ll.tif

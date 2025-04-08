@@ -8,19 +8,24 @@ Location of the ``MERIT-Hydro`` Dataset Files
 ---------------------------------------------
 
 The ``MERIT-Hydro`` geospatial dataset files are located under the
-following directory accessible from Digital Alliance (formerly Compute
-Canada) Graham cluster:
+following directory accessible from multiple clusters:
 
 .. code:: console
 
+   # DRAC Graham HPC location
    /project/rpp-kshook/CompHydCore/merit_hydro/raw_data # rpp-kshook allocation
-   /project/rrg-mclark/data/geospatial-data/MERIT-Hydro # rrg-mclark allocation
+
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/MERIT-Hydro # comphyd_lab allocation
+
+   # Perdue University HPC location
+   /anvil/datasets/geospatial/MERIT_Hydro # Anvil community storage
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/CompHydCore/merit_hydro/raw_data
+   /path/to/dataset/files/
    ├── elv
    │   ├── elv_n00e000.tar
    │   ├── elv_n00e030.tar

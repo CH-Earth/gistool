@@ -8,19 +8,21 @@ Location of the ``soil_class`` Dataset Files
 --------------------------------------------
 
 The ``soil_class`` geospatial dataset files are located under the
-following directory accessible from Digital Research Alliance of Canada
-(DRA, formerly Compute Canada) Graham cluster:
+following directory accessible from multiple clusters:
 
 .. code:: console
 
+   # DRAC Graham HPC location
    /project/rpp-kshook/Model_Output/soil_classes # rpp-kshook allocation
-   /project/rrg-mclark/data/geospatial-data/soil_classes # rrg-mclark allocation
+
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/soil_classes # comphyd_lab allocation
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/Model_Output/soil_classes
+   /path/to/dataset/dir/
    └── soil_classes.tif 
 
 Spatial and Temporal Extents

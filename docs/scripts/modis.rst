@@ -10,19 +10,24 @@ Location of the ``MODIS`` Dataset Files
 ---------------------------------------
 
 The ``MODIS`` geospatial dataset files are located under the following
-directory accessible from Digital Alliance (formerly Compute Canada)
-Graham cluster:
+directory accessible from multiple clusters:
 
 .. code:: console
 
-   /project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/ # rpp-kshook allocation
-   /project/rrg-mclark/data/geospatial-data/MODIS # rrg-mclark allocation
+   # DRAC Graham HPC location
+   /project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/ #rpp-kshook allocation
+
+   # UCalgary ARC HPC location
+   /work/comphyd_lab/data/geospatial-data/MODIS #comphyd_lab allocation
+
+   # Perdue University Anvil HPC location
+   /anvil/datasets/geospatial # Anvil community storage
 
 And the structure of the files is as following:
 
 .. code:: console
 
-   /project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/
+   /path/to/dataset/dir/
    ├── MCD12Q1.006
    │   ├── 2001.01.01
    │   │   ├── MCD12Q1.A2001001.h00v08.006.2018142182903.hdf 

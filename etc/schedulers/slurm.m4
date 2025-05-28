@@ -3,7 +3,7 @@
 `#SBATCH' --nodes=__NODES__
 `#SBATCH' --time=__TIME__
 `#SBATCH' --mem=__MEM__
-`#SBATCH' --job-name=DATA-__SCRIPTNAME__
+`#SBATCH' --job-name=GIS-__SCRIPTNAME__
 `#SBATCH' --error=__LOGDIR__/gistool_%A-%a_err.txt
 `#SBATCH' --output=__LOGDIR__/gistool_%A-%a.txt
 ifdef(`__PARTITION__', `#SBATCH --partition='__PARTITION__, `dnl')

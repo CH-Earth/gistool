@@ -189,7 +189,7 @@ do
   esac
 done
 
-# check mandatory arguments whether provided
+# check mandatory arguments whether provided or not
 if [[ -z "${geotiffDir}" ]] || \
    [[ -z "${geotiff}"    ]] || \
    [[ -z "${variables}"  ]] || \

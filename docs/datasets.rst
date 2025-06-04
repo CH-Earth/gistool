@@ -59,6 +59,11 @@ The following table lists available datasets, their DOI, and provides links to s
      - Not Applicable (N/A)
      - 4326
      - 10.1002/2013MS000293
+   * - 8
+     - Generic TIF Files
+     - Any
+     - Any
+     - Multiple
 
 
 ---------------------
@@ -75,4 +80,5 @@ Detailed Descriptions
    scripts/modis.rst
    scripts/soil_class.rst
    scripts/soil_grids.rst
+   scripts/generic-tif.rst
 

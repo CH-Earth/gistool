@@ -117,15 +117,16 @@ documentation!
    :maxdepth: 2
    :caption: User Manual
 
-   index
    quick_start
    json
 
+.. toctree::
    :maxdepth: 3
    :caption: Datasets
 
    datasets
 
+.. toctree::
    :maxdepth: 1
    :caption: License
 

@@ -76,7 +76,7 @@ Script options:
                                    must be comma delimited float numbers between
                                    0 and 1; optional [defaults to every 5th quantile]
   -p, --prefix=STR                 Prefix  prepended to the output files
-  -b, --parsable                   Parsable SLURM message mainly used
+  -b, --parsable                   Parsable scheduler message mainly used
                                    for chained job submissions
   -c, --cache=DIR                  Path of the cache directory; optional
   -E, --email=STR                  E-mail when job starts, ends, and fails; optional
@@ -614,6 +614,10 @@ case "${geotiff,,}" in
   # National Hydrology Model (NHM) static layers dataset
   "nhm" | "tgf" | "gf" )
     call_processing_func "$recipePath/nhm/nhm.sh"
+    ;;
+
+  "generic-tif" | "generic_tif" | "tif" | "tiff" )
+    call_processing_func "$recipePath/generic_tif/generic_tif.sh"
     ;;
 
   # dataset not included above

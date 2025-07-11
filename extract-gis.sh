@@ -78,9 +78,10 @@ Script options:
   -p, --prefix=STR                 Prefix  prepended to the output files
   -b, --parsable                   Parsable scheduler message mainly used
                                    for chained job submissions
+  -D, --dependency                 Executation dependency submission ID, optional
   -c, --cache=DIR                  Path of the cache directory; optional
   -E, --email=STR                  E-mail when job starts, ends, and fails; optional
-  -C, --cluster=JSON                JSON file detailing cluster-specific details
+  -C, --cluster=JSON               JSON file detailing cluster-specific details
   -V, --version                    Show version
   -h, --help                       Show this screen and exit
 
@@ -128,13 +129,13 @@ recipePath="$(realpath $(dirname $0)/var/repos/builtin/recipes/)"
 parsedArguments=$( \
   getopt --alternative \
   --name "extract-dataset" \
-  -o d:i:r:v:o:s:e:l:n:f:F:jt:a:Uq:p:c:E:C:Vhb \
+  -o d:i:r:v:o:s:e:l:n:f:F:jt:a:Uq:p:c:E:C:VhbD: \
   --long dataset:,dataset-dir:,crs:,variable:, \
   --long output-dir:,start-date:,end-date:,lat-lims:, \
   --long lon-lims:,shape-file:,fid:,submit-job, \
   --long print-geotiff:,stat:,include-na,quantile:, \
   --long prefix:,cache:,email:,cluster:, \
-  --long version,help,parsable -- "$@" \
+  --long version,help,parsable,dependency: -- "$@" \
 )
 
 validArguments=$?
@@ -173,6 +174,7 @@ do
     -q | --quantile)      quantiles="$2"       ; shift 2 ;; # optional
     -p | --prefix)        prefixStr="$2"       ; shift 2 ;; # required
     -b | --parsable)      parsable=true        ; shift   ;; # optional
+    -D | --dependency)    dependency="$2"      ; shift 2 ;; # optional
     -c | --cache)         cache="$2"           ; shift 2 ;; # optional
     -E | --email)         email="$2"           ; shift 2 ;; # optional
     -C | --cluster)       cluster="$2"         ; shift 2 ;; # required
@@ -448,6 +450,7 @@ function call_processing_func () {
       --arg "logDir" "$logDir" \
       --arg "email" "$email" \
       --arg "parsable" "$parsable" \
+      --arg "dependency" "$dependency" \
       --argjson "specs" "$(jq -r '.specs' $cluster)" \
       '$ARGS.named + $specs | del(.specs)' \
     )"

@@ -103,9 +103,10 @@ is as follows:
       -p, --prefix=STR                 Prefix  prepended to the output files
       -b, --parsable                   Parsable SLURM message mainly used
                                        for chained job submissions
+      -D, --dependency                 Executation dependency submission ID, optional
       -c, --cache=DIR                  Path of the cache directory; optional
       -E, --email=STR                  E-mail when job starts, ends, and fails; optional
-      -C, --cluster=JSON                JSON file detailing cluster-specific details
+      -C, --cluster=JSON               JSON file detailing cluster-specific details
       -V, --version                    Show version
       -h, --help                       Show this screen and exit
 

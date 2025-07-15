@@ -450,7 +450,6 @@ function call_processing_func () {
       --arg "logDir" "$logDir" \
       --arg "email" "$email" \
       --arg "parsable" "$parsable" \
-      --arg "dependency" "$dependency" \
       --argjson "specs" "$(jq -r '.specs' $cluster)" \
       '$ARGS.named + $specs | del(.specs)' \
     )"
@@ -525,6 +524,13 @@ function call_processing_func () {
     # 1. job scheduler directives
     m4 ${jobDirectiveM4} ${schedulersPath}/${scheduler}.m4 > \
       ${jobScriptPath}
+ 
+    # 1.5 Due to M4's limitation in processing comma-separated values,
+    #     adjust dependencies manually
+    if [[ -n "$dependency" ]]; then
+      dependencyLine="#SBATCH --dependency=afterok:$dependency"
+      sed -i "2i\\${dependencyLine}" "${jobScriptPath}"
+    fi
 
     # 2. module inititation, if applicable
     echo -e "\n${jobModulesInit}" >> "${jobScriptPath}"

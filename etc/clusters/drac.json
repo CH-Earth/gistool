@@ -22,5 +22,5 @@
         "geos": "module -q load geos/3.12.0",
         "proj": "module -q load proj/9.2.0"
     },
-    "lib-path": "/project/rrg-alpie/data/assets/r-envs"
+    "lib-path": "/project/rrg-mclark/local/envs/r-env"
 }

@@ -15,6 +15,9 @@ directory accessible from multiple clusters:
    # DRAC Graham HPC location
    /project/rpp-kshook/Model_Output/Landsat/ #rpp-kshook allocation
 
+   # DRAC Fir HPC location
+   /project/rrg-alpie/data/geospatial-data/Landsat/ #rrg-alpie allocation
+
    # UCalgary ARC HPC location
    /work/comphyd_lab/data/geospatial-data/Landsat #comphyd_lab allocation
 

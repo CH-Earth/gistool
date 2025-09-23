@@ -15,6 +15,9 @@ following directory accessible from multiple clusters:
    # DRAC Graham HPC location
    /project/rpp-kshook/Model_Output/soil_classes # rpp-kshook allocation
 
+   # DRAC Fir HPC location
+   /project/rrg-alpie/data/geospatial-data/soil_classes # rrg-alpie allocation
+
    # UCalgary ARC HPC location
    /work/comphyd_lab/data/geospatial-data/soil_classes # comphyd_lab allocation
 

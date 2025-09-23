@@ -18,6 +18,9 @@ following directory accessible from multiple clusters:
    # UCalgary ARC HPC location
    /work/comphyd_lab/data/geospatial-data/SoilGridsV1/soilgrids/former/2017-03-10/data # comphyd_lab allocation
 
+   # DRAC Fir HPC location
+   /project/rrg-alpie/data/geospatial-data/SoilGridsV1/soilgrids/former/2017-03-10/data # rrg-alpie allocation
+
    # Perdue University Anvil HPC location
    /anvil/datasets/geospatial/Soil_Grids_v1/soilgrids/former/2017-03-10/data # Anvil community storage
 

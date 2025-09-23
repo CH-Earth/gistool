@@ -17,6 +17,9 @@ directory accessible from multiple clusters:
    # DRAC Graham HPC location
    /project/rpp-kshook/Climate_Forcing_Data/geospatial-data/MODIS/ #rpp-kshook allocation
 
+   # DRAC Fir HPC location
+   /project/rrg-alpie/data/geospatial-data/MODIS/ # rrg-alpie allocation
+
    # UCalgary ARC HPC location
    /work/comphyd_lab/data/geospatial-data/MODIS #comphyd_lab allocation
 

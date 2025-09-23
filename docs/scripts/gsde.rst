@@ -14,6 +14,9 @@ directory accessible from multiple clusters:
 
    # DRAC Graham HPC location
    /project/rpp-kshook/Model_Output/GSDE/download/gsde-30sec/ # rpp-kshook allocation
+   
+   # DRAC Fir HPC location
+   /project/rrg-alpie/data/geospatial-data/GSDE/download/gsde-30sec/ # rrg-alpie allocation
 
 And the structure of the files is as following:
 

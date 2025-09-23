@@ -21,6 +21,9 @@ listed below. These paths can be used as values for the
    /work/comphyd_lab/data/geospatial-data/baker_creek_dem # High resolution Baker Creek DEM
    /work/comphyd_lab/data/geospatial-data/wolf_creek_dem # High resolution Wolf Creek DEM
    /work/comphyd_lab/data/geospatial-data/marmot_creek_dem # High resolution Marmot Creek DEM
+   
+   # DRAC Fir Allocation Cluster
+   /project/rrg-alpie/data/geospatial-data/* # rrg-alpie allocation
 
 Dataset Variables
 -----------------

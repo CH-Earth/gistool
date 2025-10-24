@@ -1,0 +1,5 @@
+{
+    "environment_variables": {
+        "job_id": "PBS_JOBID"
+    }
+}

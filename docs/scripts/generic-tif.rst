@@ -24,6 +24,7 @@ listed below. These paths can be used as values for the
    
    # DRAC Fir Allocation Cluster
    /project/rrg-alpie/data/geospatial-data/* # rrg-alpie allocation
+   /project/rrg-alpie/data/geospatial-data/canelevation-dem/mrdem-30 # 30-meter MRDEM DSM and DTM layers
 
 Dataset Variables
 -----------------
@@ -60,6 +61,11 @@ This variables of this dataset are detailed in the table below:
 |   |           |                             | River Basin, AB,    |          |
 |   |           |                             | Canada              |          |
 +---+-----------+-----------------------------+---------------------+----------+
+| 6 | MRDEM     | ``mrdem-30-dsm.tif`` &      | 30m DSM and DTM     |  [6]_    |
+|   |           | ``mrdem-30-dtm.tif``        | layers of Canada    |          |
+|   |           |                             |                     |          |
+|   |           |                             |                     |          |
++---+-----------+-----------------------------+---------------------+----------+
 
 .. [1]
    NOAA National Centers for Environmental Information (NCEI). (2021).
@@ -93,3 +99,9 @@ This variables of this dataset are detailed in the table below:
    (2019). Hydrometeorological data from Marmot Creek Research Basin,
    Canadian Rockies. Earth Syst. Sci. Data, 11, 455–471,
    https://doi.org/10.5194/essd-11-455-2019.
+
+.. [6]
+   H. McGrath et al., "Descriptor: Medium Resolution Digital Elevation
+   Model From Natural Resources Canada’s CanElevation Series (MRDEM-30),"
+   in IEEE Data Descriptions, vol. 2, pp. 211-217, 2025,
+   doi: 10.1109/IEEEDATA.2025.3576318.

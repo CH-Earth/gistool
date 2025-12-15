@@ -268,7 +268,7 @@ subset_geotiff () {
     -co COMPRESS="DEFLATE" \
     -co BIGTIFF="YES" \
     -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
-    -projwin_srs "$sourceProj4" \
+    -projwin_srs "$rasterProj4" \
     > /dev/null;
 }
 
@@ -293,6 +293,7 @@ if [[ -n $shapefile ]]; then
   extract_shapefile_extents "${shapefile}" "${rasterProj4}"
 else
   sourceProj4="EPSG:4326"
+  rasterProj4="$sourceProj4"
 fi
 
 # Subset and produce stats if needed

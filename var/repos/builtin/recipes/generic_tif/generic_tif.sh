@@ -268,7 +268,7 @@ subset_geotiff () {
     -co COMPRESS="DEFLATE" \
     -co BIGTIFF="YES" \
     -projwin "$lonMin" "$latMax" "$lonMax" "$latMin" "${sourceVrt}" "${destPath}" \
-    -projwin_srs "$rasterProj4" \
+    -projwin_srs "$sourceProj4" \
     > /dev/null;
 }
 
